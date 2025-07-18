@@ -531,7 +531,7 @@
 
       // Esperado: id,nombre,descripcion,imagen,precio,categoria,estado
       productos = prods.map(p => ({
-        ID: p.id || p.ID || p.Id || slug(p.nombre) + Math.random().toString(36).slice(2,7),
+        id: p.id || p.ID || p.Id || slug(p.nombre) + Math.random().toString(36).slice(2,7),
         nombre: p.nombre || p.Nombre || '',
         descripcion: p.descripcion || p.Descripcion || '',
         imagen: p.imagen || p.Imagen || '',
