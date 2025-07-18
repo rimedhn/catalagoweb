@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Catálogo de Productos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts y Material Icons para estilos atractivos -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #4a90e2;
+      --accent-color: #50e3c2;
+      --text-dark: #183153;
+      --text-light: #fff;
+      --card-bg: #fff;
+      --card-shadow: 0 2px 8px 0 rgba(60,60,60,0.12);
+      --card-radius: 15px;
+      --border: #e6e9f0;
+      --danger: #e53935;
+      --success: #27ae60;
+      --whatsapp: #25d366;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f7f9fb;
+      margin: 0;
+      color: var(--text-dark);
+    }
+    header {
+      background: var(--main-color);
+      color: var(--text-light);
+      padding: 28px 0 18px 0;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.3rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 28px 0 10px;
+    }
+    .category-btn {
+      background: var(--card-bg);
+      color: var(--main-color);
+      border: 2px solid var(--main-color);
+      border-radius: 25px;
+      padding: 7px 22px;
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all .22s;
+    }
+    .category-btn.active, .category-btn:hover {
+      background: var(--main-color);
+      color: #fff;
+    }
+    .catalogo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: center;
+      margin: 18px auto 70px;
+      max-width: 1250px;
+    }
+    .cat-group {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .cat-title {
+      font-size: 1.3rem;
+      margin: 24px 0 12px 10px;
+      color: var(--main-color);
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .card-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: flex-start;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      width: 265px;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 16px 0;
+      position: relative;
+      border: 1.5px solid var(--border);
+      transition: transform .16s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-3px) scale(1.025);
+      box-shadow: 0 4px 18px 0 rgba(60,60,60,0.18);
+      border-color: var(--main-color);
+    }
+    .card-img {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+      border-radius: var(--card-radius) var(--card-radius) 0 0;
+      background: #e3e3e3;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .card-body {
+      padding: 15px 18px 0 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-title {
+      font-size: 1.11rem;
+      font-weight: 700;
+      margin: 0 0 3px 0;
+      color: var(--text-dark);
+    }
+    .card-desc {
+      font-size: .99rem;
+      color: #6c7a89;
+      margin-bottom: 9px;
+      flex: 1;
+    }
+    .card-price {
+      font-size: 1.17rem;
+      color: var(--accent-color);
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+    .card-add {
+      background: var(--success);
+      color: #fff;
+      border: none;
+      border-radius: 22px;
+      padding: 7px 22px;
+      font-size: 1.08rem;
+      font-weight: 500;
+      cursor: pointer;
+      align-self: flex-end;
+      transition: background .22s;
+      margin-top: 8px;
+    }
+    .card-add:hover { background: #219150; }
+    /* Floating buttons */
+    .fab {
+      position: fixed;
+      right: 25px;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      color: #fff;
+      box-shadow: 0 3px 15px rgba(30,30,30,0.18);
+      border: none;
+      font-size: 2.2em;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .19s;
+    }
+    .fab-cart {
+      bottom: 102px;
+      background: var(--main-color);
+      font-size: 2.2em;
+    }
+    .fab-whatsapp {
+      bottom: 30px;
+      background: var(--whatsapp);
+      font-size: 2.2em;
+      text-decoration: none;
+    }
+    .fab-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--danger);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 1em;
+      padding: 2px 8px;
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+      line-height: 1.2;
+    }
+    /* Carrito Drawer */
+    .drawer-bg {
+      display: none;
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(30,40,60,0.20);
+      z-index: 200;
+    }
+    .drawer {
+      position: fixed;
+      right: 0; top: 0;
+      width: 435px;
+      max-width: 100vw;
+      height: 100vh;
+      background: #fff;
+      box-shadow: -3px 0 22px rgba(40,40,40,0.10);
+      z-index: 201;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .26s;
+    }
+    .drawer.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--main-color);
+      color: #fff;
+      padding: 26px 24px 16px;
+      font-size: 1.24rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      border-bottom-left-radius: 22px;
+      border-bottom-right-radius: 22px;
+    }
+    .drawer-close {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 2.3rem;
+      cursor: pointer;
+    }
+    .cart-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px 0 16px;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #e6e9f0;
+      gap: 12px;
+    }
+    .cart-img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 7px;
+      background: #eee;
+      border: 1px solid #ececec;
+    }
+    .cart-details {
+      flex: 1;
+      padding: 0 7px;
+    }
+    .cart-title {
+      font-weight: 600;
+      font-size: 1.04rem;
+      margin-bottom: 2px;
+      color: var(--main-color);
+    }
+    .cart-price {
+      color: var(--accent-color);
+      font-weight: 600;
+      font-size: 1.01rem;
+    }
+    .cart-controls {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .cart-qty-btn {
+      width: 30px; height: 30px;
+      border: none;
+      border-radius: 50%;
+      background: var(--main-color);
+      color: #fff;
+      font-size: 1.21rem;
+      cursor: pointer;
+      transition: background .17s;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-qty-btn:hover { background: var(--accent-color);}
+    .cart-qty {
+      min-width: 34px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.04rem;
+      margin: 0 5px;
+      border: 1.5px solid #dbe6f3;
+      border-radius: 6px;
+      height: 30px;
+      outline: none;
+    }
+    .cart-remove {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      font-size: 1.18rem;
+      cursor: pointer;
+      margin-left: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-summary {
+      padding: 21px 24px 14px;
+      background: #f8fafc;
+      border-top: 1px solid #e6e9f0;
+      font-size: 1.13rem;
+      font-weight: 500;
+    }
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .pedido-form {
+      padding: 14px 24px;
+      background: #f8fcff;
+      border-top: 1px solid #e6e9f0;
+      font-size: 1.02rem;
+      margin-bottom: 20px;
+    }
+    .pedido-form label {
+      display: block;
+      font-weight: 500;
+      font-size: .99em;
+      margin-bottom: 2px;
+      color: #2d4059;
+    }
+    .pedido-form input, .pedido-form textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 14px;
+      border: 1.5px solid #bcd2ee;
+      border-radius: 6px;
+      font-size: 1em;
+      font-family: inherit;
+      box-sizing: border-box;
+      background: #fff;
+      outline: none;
+    }
+    .pedido-form input[type="number"]::-webkit-inner-spin-button,
+    .pedido-form input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .pedido-enviar {
+      background: var(--success);
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-size: 1.18rem;
+      font-weight: 600;
+      padding: 13px;
+      width: 100%;
+      margin-top: 9px;
+      cursor: pointer;
+      transition: background .17s;
+    }
+    .pedido-enviar:hover { background: #219150; }
+    .pedido-enviar[disabled] { background: #b0c4b1; cursor: default;}
+    /* Responsive */
+    @media (max-width: 950px) {
+      .catalogo { gap: 18px;}
+      .card { width: 210px;}
+      .cat-title { margin: 16px 0 8px 7px;}
+    }
+    @media (max-width: 650px) {
+      .catalogo { gap: 8px;}
+      .card { width: 97vw; min-width: 0;}
+      .cat-title { margin: 10px 0 4px 4vw;}
+    }
+    @media (max-width: 540px) {
+      .drawer { width: 99vw; }
+      .drawer-header { padding: 13px 6vw 10px;}
+      .pedido-form, .cart-summary { padding-left: 4vw; padding-right: 4vw;}
+    }
+    /* Mensaje */
+    .msg {
+      position: fixed;
+      top: 21px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--main-color);
+      color: #fff;
+      padding: 12px 34px;
+      border-radius: 9px;
+      font-size: 1.11rem;
+      z-index: 7000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .33s;
+    }
+    .msg.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* Loader */
+    .loader {
+      margin: 130px auto 0 auto;
+      border: 8px solid #eee;
+      border-top: 8px solid var(--main-color);
+      border-radius: 50%;
+      width: 62px;
+      height: 62px;
+      animation: spin 1s linear infinite;
+      display: block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Catálogo de Productos</h1>
+    <div style="font-size:1.13rem;opacity:.90;margin-top:6px;">Explora nuestros productos y haz tu pedido fácilmente</div>
+  </header>
+  <div class="categories" id="categoryFilters"></div>
+  <div class="catalogo" id="catalogo"></div>
+  <!-- Botón flotante Carrito -->
+  <button class="fab fab-cart" id="fabCart" style="display:none;">
+    <span class="material-icons">shopping_cart</span>
+    <span class="fab-badge" id="cartCount">0</span>
+  </button>
+  <!-- Botón flotante WhatsApp -->
+  <a class="fab fab-whatsapp" id="fabWhatsapp" href="https://wa.me/51999999999" target="_blank" title="Chatea con nosotros">
+    <span class="material-icons">whatsapp</span>
+  </a>
+  <!-- Drawer Carrito -->
+  <div class="drawer-bg" id="drawerBg"></div>
+  <aside class="drawer" id="carritoDrawer" aria-hidden="true">
+    <div class="drawer-header">
+      <span>Tu Carrito</span>
+      <button class="drawer-close" id="closeDrawer" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="cart-summary" id="cartSummary"></div>
+    <form class="pedido-form" id="pedidoForm" autocomplete="off">
+      <label for="nombre">Nombre completo</label>
+      <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre">
+      <label for="direccion">Dirección</label>
+      <input type="text" id="direccion" name="direccion" required placeholder="Dirección exacta">
+      <label for="telefono">Teléfono</label>
+      <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 999888777">
+      <label for="referencia">Referencia (opcional)</label>
+      <input type="text" id="referencia" name="referencia" placeholder="Referencia para entrega">
+      <label for="notas">Notas adicionales (opcional)</label>
+      <textarea id="notas" name="notas" rows="2" placeholder="Otros detalles"></textarea>
+      <button class="pedido-enviar" type="submit" id="enviarPedido" disabled>Enviar pedido por WhatsApp</button>
+    </form>
+  </aside>
+  <div class="msg" id="msg"></div>
+  <script>
+  //////////////////// Configuración ////////////////////////
+
+  // Cambia esta URL por la de tu hoja de Google Sheets publicada como CSV
+  // Ejemplo: https://docs.google.com/spreadsheets/d/e/2PACX-XXXXX/pub?gid=0&single=true&output=csv
+  const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTf9KtVuLvdS9dTkZGkEn0o_HGjMyW2FqHkcs4hXBLHiSWBnVqbyX0NkkXsOiTEhjffYGnbWHCP1CFC/pub?gid=0&single=true&output=csv';
+  // Cambia el número por tu WhatsApp (formato internacional sin +)
+  const WHATSAPP_NUMBER = '50493593126';
+
+  /////////////////// Utilidades ///////////////////////
+  function showMsg(txt, time=3000) {
+    const m = document.getElementById('msg');
+    m.textContent = txt;
+    m.classList.add('show');
+    setTimeout(()=>{m.classList.remove('show');}, time);
+  }
+  function money(v) { return 'S/ ' + (+v).toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function slug(s) { return s?.toLowerCase().replace(/[^a-z0-9]/gi,'_')||''; }
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, function(m) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+  ///////////// Estado global //////////////
+  let productos = [];
+  let categorias = [];
+  let filtroCategoria = 'todos';
+  let carrito = JSON.parse(localStorage.getItem('carrito')||'[]');
+  let catalogo_por_categoria = {};
+
+  /////////// Fetch y Parseo de Google Sheets ///////////
+  async function getProductos() {
+    document.getElementById('catalogo').innerHTML = '<div class="loader"></div>';
+    try {
+      const resp = await fetch(SHEET_CSV_URL);
+      if (!resp.ok) throw new Error('No se pudo cargar productos');
+      const csv = await resp.text();
+
+      // Parseo CSV
+      const [headerL, ...lines] = csv.split(/\r?\n/).filter(l=>l.trim());
+      const headers = headerL.split(',').map(h=>h.trim().replace(/"/g,''));
+      const prods = lines.map(l => {
+        // Soporta campos con comas en comillas
+        const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+        const cols = [];
+        let m; while((m = regex.exec(l))!==null) {
+          let v = m[1];
+          if(v.startsWith('"') && v.endsWith('"')) v = v.slice(1,-1).replace(/""/g,'"');
+          cols.push(v);
+        }
+        const obj = {};
+        headers.forEach((h,i)=>obj[h]=cols[i]||'');
+        return obj;
+      });
+
+      // Campos: ID, Nombre Producto, Descripción, Precio, Categoría, Imagen URL, Estado
+      productos = prods.map(p => ({
+        id: p.ID || '',
+        nombre: p['Nombre Producto'] || '',
+        descripcion: p['Descripción'] || '',
+        imagen: p['Imagen URL'] || '',
+        precio: Number(p['Precio']|| 0),
+        categoria: p['Categoría'] || 'Sin categoría',
+        estado: (p['Estado'] || '').toLowerCase().trim() === 'activo'
+      })).filter(p=>p.estado);
+
+      categorias = [...new Set(productos.map(p=>p.categoria))];
+      categorias.sort();
+      categorias.unshift('Todos');
+
+      catalogo_por_categoria = {};
+      categorias.forEach(cat => {
+        if (cat==='Todos') return;
+        catalogo_por_categoria[cat] = productos.filter(p=>p.categoria===cat);
+      });
+
+      renderCategorias();
+      renderCatalogo();
+    } catch (e) {
+      document.getElementById('catalogo').innerHTML =
+        '<div style="color:red;text-align:center;margin:90px auto;font-size:1.22em;">Error al cargar productos.<br>'+escapeHtml(e.message)+'</div>';
+      productos = [];
+      categorias = [];
+    }
+  }
+
+  ////////// Renderizado de Categorías ///////////
+  function renderCategorias() {
+    const cont = document.getElementById('categoryFilters');
+    cont.innerHTML = '';
+    categorias.forEach((cat,i) => {
+      const btn = document.createElement('button');
+      btn.className = 'category-btn'+(i===0?' active':'');
+      btn.textContent = cat;
+      btn.onclick = () => {
+        filtroCategoria = slug(cat);
+        document.querySelectorAll('.category-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCatalogo();
+      };
+      cont.appendChild(btn);
+    });
+  }
+
+  ////////// Renderizado del Catálogo ///////////
+  function renderCatalogo() {
+    const cont = document.getElementById('catalogo');
+    cont.innerHTML = '';
+    let prods = productos;
+    if (filtroCategoria && filtroCategoria!=='todos') {
+      prods = productos.filter(p=>slug(p.categoria)===filtroCategoria);
+      const group = document.createElement('div');
+      group.className = 'cat-group';
+      group.appendChild(renderCardList(prods));
+      cont.appendChild(group);
+    } else {
+      categorias.forEach(cat => {
+        if (cat==='Todos') return;
+        const prodsCat = catalogo_por_categoria[cat]||[];
+        if (!prodsCat.length) return;
+        const group = document.createElement('div');
+        group.className = 'cat-group';
+        const h = document.createElement('div');
+        h.className = 'cat-title';
+        h.textContent = cat;
+        group.appendChild(h);
+        group.appendChild(renderCardList(prodsCat));
+        cont.appendChild(group);
+      });
+    }
+    if (prods.length === 0) {
+      cont.innerHTML = '<div style="margin:80px auto;text-align:center;font-size:1.1em;color:#aaa;">No hay productos en esta categoría.</div>';
+    }
+  }
+
+  function renderCardList(prods) {
+    const list = document.createElement('div');
+    list.className = 'card-list';
+    prods.forEach(prod => list.appendChild(renderCard(prod)));
+    return list;
+  }
+
+  function renderCard(prod) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    // Imagen
+    if (prod.imagen) {
+      const img = document.createElement('img');
+      img.className = 'card-img';
+      img.src = prod.imagen;
+      img.alt = prod.nombre;
+      img.onerror = () => { img.src = 'https://via.placeholder.com/300x200?text=Sin+Imagen'; };
+      div.appendChild(img);
+    } else {
+      const img = document.createElement('img');
+      img.className = 'card-img';
+      img.src = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+      img.alt = 'Sin imagen';
+      div.appendChild(img);
+    }
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = prod.nombre;
+    body.appendChild(title);
+    const desc = document.createElement('div');
+    desc.className = 'card-desc';
+    desc.textContent = prod.descripcion;
+    body.appendChild(desc);
+    const price = document.createElement('div');
+    price.className = 'card-price';
+    price.textContent = money(prod.precio);
+    body.appendChild(price);
+    const addBtn = document.createElement('button');
+    addBtn.className = 'card-add';
+    addBtn.textContent = 'Agregar';
+    addBtn.onclick = () => addToCart(prod.id, 1, prod);
+    body.appendChild(addBtn);
+    div.appendChild(body);
+    return div;
+  }
+
+  //////// Carrito: Operaciones /////////
+  function addToCart(id, qty=1, prodRef=null) {
+    let idx = carrito.findIndex(i=>i.id===id);
+    if (idx >= 0) {
+      carrito[idx].qty += qty;
+    } else {
+      const prod = prodRef || productos.find(p=>p.id===id);
+      if (!prod) return;
+      carrito.push({id, qty:clamp(qty,1,999), nombre:prod.nombre, precio:prod.precio, imagen:prod.imagen});
+    }
+    saveCart();
+    showMsg('Producto agregado al carrito');
+    updateCartBadge();
+    document.getElementById('fabCart').style.display = 'flex';
+  }
+  function removeFromCart(id) {
+    carrito = carrito.filter(i=>i.id!==id);
+    saveCart();
+    updateCartBadge();
+    renderDrawer();
+    if (carrito.length===0) {
+      closeDrawer();
+      document.getElementById('fabCart').style.display = 'none';
+    }
+  }
+  function setCartQty(id, qty) {
+    let idx = carrito.findIndex(i=>i.id===id);
+    if (idx>=0) {
+      carrito[idx].qty = clamp(qty,1,999);
+      saveCart();
+      renderDrawer();
+      updateCartBadge();
+    }
+  }
+  function clearCart() {
+    carrito = [];
+    saveCart();
+    updateCartBadge();
+    renderDrawer();
+  }
+  function saveCart() {
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+  }
+  function updateCartBadge() {
+    const cnt = carrito.reduce((a,i)=>a+i.qty,0);
+    document.getElementById('cartCount').textContent = cnt;
+    document.getElementById('fabCart').style.display = cnt>0 ? 'flex' : 'none';
+  }
+
+  //////// Drawer Carrito ////////
+  function openDrawer() {
+    document.getElementById('drawerBg').style.display = 'block';
+    document.getElementById('carritoDrawer').classList.add('open');
+    document.getElementById('carritoDrawer').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    renderDrawer();
+  }
+  function closeDrawer() {
+    document.getElementById('drawerBg').style.display = 'none';
+    document.getElementById('carritoDrawer').classList.remove('open');
+    document.getElementById('carritoDrawer').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  function renderDrawer() {
+    const list = document.getElementById('cartList');
+    if (carrito.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:#aaa;margin:48px 0 12px;font-size:1.13em;">No hay productos en tu carrito.</div>';
+      document.getElementById('cartSummary').innerHTML = '';
+      document.getElementById('enviarPedido').disabled = true;
+      return;
+    }
+    list.innerHTML = '';
+    carrito.forEach(item => {
+      const prod = productos.find(p=>p.id===item.id) || item;
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      const img = document.createElement('img');
+      img.className = 'cart-img';
+      img.src = prod.imagen || 'https://via.placeholder.com/100x100?text=Sin+Imagen';
+      img.alt = prod.nombre;
+      img.onerror = () => { img.src = 'https://via.placeholder.com/100x100?text=Sin+Imagen'; };
+      div.appendChild(img);
+      const dets = document.createElement('div');
+      dets.className = 'cart-details';
+      dets.innerHTML = `<div class="cart-title">${escapeHtml(prod.nombre||'')}</div>
+                        <div class="cart-price">${money(prod.precio||0)}</div>`;
+      div.appendChild(dets);
+      const controls = document.createElement('div');
+      controls.className = 'cart-controls';
+      // Botón menos
+      const btnMinus = document.createElement('button');
+      btnMinus.className = 'cart-qty-btn';
+      btnMinus.innerHTML = '-';
+      btnMinus.onclick = ()=> setCartQty(item.id, item.qty-1);
+      controls.appendChild(btnMinus);
+      // Cantidad
+      const qty = document.createElement('input');
+      qty.type = "number";
+      qty.className = 'cart-qty';
+      qty.value = item.qty;
+      qty.min = 1;
+      qty.max = 999;
+      qty.onchange = ()=> setCartQty(item.id, +qty.value);
+      controls.appendChild(qty);
+      // Botón más
+      const btnPlus = document.createElement('button');
+      btnPlus.className = 'cart-qty-btn';
+      btnPlus.innerHTML = '+';
+      btnPlus.onclick = ()=> setCartQty(item.id, item.qty+1);
+      controls.appendChild(btnPlus);
+      // Botón eliminar
+      const btnDel = document.createElement('button');
+      btnDel.className = 'cart-remove';
+      btnDel.innerHTML = '<span class="material-icons" style="font-size:1.1em;">delete</span>';
+      btnDel.title = "Eliminar";
+      btnDel.onclick = ()=> removeFromCart(item.id);
+      controls.appendChild(btnDel);
+      div.appendChild(controls);
+      list.appendChild(div);
+    });
+    // Resumen
+    const total = carrito.reduce((a,it)=>a+it.qty*(+it.precio),0);
+    const rows = [
+      `<div class="cart-total-row"><span>Total productos:</span> <span>${carrito.reduce((a,i)=>a+i.qty,0)}</span></div>`,
+      `<div class="cart-total-row"><span>Subtotal:</span> <span>${money(total)}</span></div>`,
+    ];
+    document.getElementById('cartSummary').innerHTML = rows.join('');
+    document.getElementById('enviarPedido').disabled = false;
+  }
+
+  /////////// Formulario Pedido //////////
+  function getPedidoDatos() {
+    const f = document.getElementById('pedidoForm');
+    return {
+      nombre: f.nombre.value.trim(),
+      direccion: f.direccion.value.trim(),
+      telefono: f.telefono.value.trim(),
+      referencia: f.referencia.value.trim(),
+      notas: f.notas.value.trim()
+    };
+  }
+  function validarPedido(d) {
+    if (!d.nombre || !d.direccion || !d.telefono) return false;
+    if (!/^[0-9\s\-\+]{7,}$/.test(d.telefono)) return false;
+    return true;
+  }
+  function armarMensajePedido(datos, carrito) {
+    let msg = '*Pedido desde el catálogo web*\n';
+    msg += `*Nombre:* ${datos.nombre}\n`;
+    msg += `*Dirección:* ${datos.direccion}\n`;
+    msg += `*Teléfono:* ${datos.telefono}\n`;
+    if (datos.referencia) msg += `*Referencia:* ${datos.referencia}\n`;
+    if (datos.notas) msg += `*Notas:* ${datos.notas}\n`;
+    msg += '\n*Detalle de productos:*\n';
+    carrito.forEach(item => {
+      msg += `- ${item.nombre} x${item.qty} (${money(item.precio)} c/u) = ${money(item.qty*item.precio)}\n`;
+    });
+    const total = carrito.reduce((a,it)=>a+it.qty*(+it.precio),0);
+    msg += `\n*Total:* ${money(total)}\n`;
+    msg += '\n_Enviado automáticamente desde el catálogo web._';
+    return encodeURIComponent(msg);
+  }
+
+  //////// Eventos /////////
+  document.getElementById('fabCart').onclick = openDrawer;
+  document.getElementById('drawerBg').onclick = closeDrawer;
+  document.getElementById('closeDrawer').onclick = closeDrawer;
+
+  document.getElementById('pedidoForm').onsubmit = function(e) {
+    e.preventDefault();
+    const datos = getPedidoDatos();
+    if (!validarPedido(datos)) {
+      showMsg('Por favor, completa y revisa todos los datos requeridos.');
+      return;
+    }
+    if (!carrito.length) {
+      showMsg('Tu carrito está vacío.');
+      return;
+    }
+    const msg = armarMensajePedido(datos, carrito);
+    const waURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+    localStorage.setItem('pedidoDatos', JSON.stringify(datos));
+    window.open(waURL, '_blank');
+    showMsg('¡Pedido enviado por WhatsApp!');
+    clearCart();
+    closeDrawer();
+  };
+
+  document.getElementById('pedidoForm').addEventListener('input', function() {
+    const datos = getPedidoDatos();
+    document.getElementById('enviarPedido').disabled = !validarPedido(datos) || carrito.length===0;
+  });
+
+  /////// Inicialización ////////
+  getProductos();
+  updateCartBadge();
+  if (carrito.length) {
+    document.getElementById('fabCart').style.display = 'flex';
+  }
+  // Rellenar form si ya hay datos guardados
+  const lastDatos = localStorage.getItem('pedidoDatos');
+  if (lastDatos) {
+    try {
+      const d = JSON.parse(lastDatos);
+      for (const k in d) if (document.getElementById(k)) document.getElementById(k).value = d[k];
+    } catch{}
+  }
+  // WhatsApp flotante
+  document.getElementById('fabWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}`;
+  // Cerrar drawer con Esc
+  window.addEventListener('keydown', function(e) {
+    if (e.key==='Escape') closeDrawer();
+  });
+  </script>
+</body>
+</html>
