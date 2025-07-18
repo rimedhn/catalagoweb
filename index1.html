@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos</title>
+    <!-- Tailwind CSS CDN para un estilo atractivo y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para la fuente y algunos ajustes */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Gris claro de fondo */
+        }
+        /* Estilos para el scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Ocultar el scrollbar en Firefox */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #888 #e0e0e0;
+        }
+
+        /* Estilos para los botones flotantes */
+        .floating-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000; /* Asegura que estén por encima de otros elementos */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 9999px; /* Botón circular */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+            cursor: pointer; /* Indica que es interactivo */
+        }
+        .floating-button:hover {
+            transform: translateY(-3px);
+        }
+        .floating-button.whatsapp {
+            background-color: #25d366; /* Color de WhatsApp */
+            color: white;
+        }
+        .floating-button.whatsapp:hover {
+            background-color: #1da851;
+        }
+        .floating-button.cart {
+            background-color: #007bff; /* Color azul para el carrito */
+            color: white;
+            right: 90px; /* Posiciona a la izquierda del botón de WhatsApp */
+        }
+        .floating-button.cart:hover {
+            background-color: #0056b3;
+        }
+        .floating-button svg {
+            width: 28px;
+            height: 28px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div class="container mx-auto p-4 md:p-8 flex-grow">
+        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-8 mt-4">🛍️ Catálogo de Productos</h1>
+
+        <!-- Contenedor principal para filtros y productos -->
+        <div class="flex flex-col lg:flex-row gap-6">
+
+            <!-- Sección de Filtros de Categoría -->
+            <aside class="lg:w-1/4 bg-white p-6 rounded-lg shadow-lg h-fit lg:sticky lg:top-8">
+                <h2 class="text-2xl font-bold text-gray-700 mb-4">Categorías</h2>
+                <div id="categoryFilters" class="flex flex-wrap gap-2">
+                    <!-- Los botones de categoría se generarán aquí con JavaScript -->
+                    <button class="px-4 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 active-category" data-category="Todos">Todos</button>
+                </div>
+            </aside>
+
+            <!-- Sección de Productos -->
+            <main class="lg:w-3/4">
+                <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Las tarjetas de productos se cargarán aquí con JavaScript -->
+                    <p class="text-center text-gray-600 col-span-full">Cargando productos...</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- Sección del Carrito de Compras -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mt-8 lg:mt-12" id="cartSection">
+            <h2 class="text-3xl font-bold text-gray-700 mb-6 flex items-center">
+                <span class="mr-2">🛒</span> Carrito de Compras
+            </h2>
+            <div id="cartItems" class="mb-4">
+                <ul class="divide-y divide-gray-200">
+                    <!-- Los productos en el carrito se listarán aquí con JavaScript -->
+                    <li class="py-3 text-gray-500">El carrito está vacío.</li>
+                </ul>
+            </div>
+            <div id="cartTotal" class="text-right text-2xl font-bold text-gray-800 mb-6">
+                Total: $0.00
+            </div>
+
+            <!-- Campos de Datos del Cliente -->
+            <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-inner">
+                <h3 class="text-2xl font-bold text-gray-700 mb-4">Datos del Cliente</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
+                        <input type="text" id="customerName" class="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div>
+                        <label for="customerAddress" class="block text-sm font-medium text-gray-700 mb-1">Dirección de Entrega <span class="text-red-500">*</span></label>
+                        <input type="text" id="customerAddress" class="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Calle Principal #123, Colonia Centro">
+                    </div>
+                    <div>
+                        <label for="customerPhone" class="block text-sm font-medium text-gray-700 mb-1">Número de Teléfono <span class="text-red-500">*</span></label>
+                        <input type="tel" id="customerPhone" class="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: +504 9988-7766">
+                    </div>
+                    <div>
+                        <label for="customerEmail" class="block text-sm font-medium text-gray-700 mb-1">Email (Opcional)</label>
+                        <input type="email" id="customerEmail" class="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: correo@ejemplo.com">
+                    </div>
+                    <div>
+                        <label for="customerNotes" class="block text-sm font-medium text-gray-700 mb-1">Notas Adicionales (Opcional)</label>
+                        <textarea id="customerNotes" rows="2" class="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Entregar después de las 3 PM"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button id="checkoutButton" class="w-full py-3 px-6 bg-green-500 text-white font-bold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition-all duration-200 flex items-center justify-center mt-6">
+                <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+                Enviar Pedido por WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para mensajes de alerta/confirmación (reemplaza alert()) -->
+    <div id="customAlertModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <p id="customAlertMessage" class="text-lg font-semibold text-gray-800 mb-4"></p>
+            <button id="customAlertCloseButton" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar un modal personalizado en lugar de alert()
+        function showCustomAlert(message) {
+            const modal = document.getElementById('customAlertModal');
+            const msgElement = document.getElementById('customAlertMessage');
+            const closeButton = document.getElementById('customAlertCloseButton');
+
+            msgElement.textContent = message;
+            modal.classList.remove('hidden');
+
+            closeButton.onclick = () => {
+                modal.classList.add('hidden');
+            };
+
+            // Cerrar modal al hacer clic fuera de él
+            modal.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            };
+        }
+
+        // ¡IMPORTANTE! Reemplaza esta URL con la URL de tu Google Sheet publicado como CSV.
+        // Pasos para obtener la URL:
+        // 1. Abre tu Google Sheet.
+        // 2. Ve a 'Archivo' > 'Compartir' > 'Publicar en la web'.
+        // 3. En la pestaña 'Publicar', selecciona la hoja que contiene tus productos.
+        // 4. Elige 'Valores separados por comas (.csv)' como formato.
+        // 5. Haz clic en 'Publicar' y copia la URL generada.
+        const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTf9KtVuLvdS9dTkZGkEn0o_HGjMyW2FqHkcs4hXBLHiSWBnVqbyX0NkkXsOiTEhjffYGnbWHCP1CFC/pub?gid=0&single=true&output=csv'; // ¡EJEMPLO! REEMPLAZA ESTO.
+
+        // ¡IMPORTANTE! Reemplaza con tu número de teléfono de WhatsApp (incluyendo código de país, sin '+' ni espacios).
+        // Ejemplo para Honduras: '50499887766'
+        const WHATSAPP_NUMBER = '50493593126'; // ¡EJEMPLO! REEMPLAZA ESTO.
+
+        let allProducts = []; // Almacena todos los productos cargados
+        let categories = new Set(); // Almacena las categorías únicas
+        let cart = []; // Almacena los productos en el carrito
+
+        /**
+         * Carga los productos desde el Google Sheet publicado como CSV.
+         * Filtra los productos que no están en estado 'Activo'.
+         * Extrae las categorías únicas y renderiza los filtros y productos.
+         */
+        async function loadProducts() {
+            try {
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvText = await response.text();
+                const lines = csvText.split('\n').filter(line => line.trim() !== ''); // Eliminar líneas vacías
+
+                if (lines.length < 2) {
+                    showCustomAlert('No hay datos válidos en el Google Sheet.');
+                    document.getElementById('productGrid').innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay productos disponibles.</p>';
+                    return;
+                }
+
+                const headers = lines[0].split(',').map(header => header.trim());
+
+                // Mapeo de encabezados para asegurar nombres de propiedades consistentes
+                const headerMap = {
+                    'ID': 'id',
+                    'Nombre Producto': 'name',
+                    'Descripción': 'description',
+                    'Precio': 'price',
+                    'Categoría': 'category',
+                    'Imagen URL': 'imageUrl',
+                    'Estado': 'status'
+                };
+
+                allProducts = lines.slice(1).map(line => {
+                    const values = line.split(',');
+                    let product = {};
+                    headers.forEach((header, index) => {
+                        const propName = headerMap[header] || header.toLowerCase().replace(/\s/g, '');
+                        product[propName] = values[index] ? values[index].trim() : '';
+                    });
+                    // Asegurar que el precio sea un número
+                    product.price = parseFloat(product.price || 0); // Default a 0 si no es válido
+                    return product;
+                }).filter(product => product.status && product.status.toLowerCase() === 'activo'); // Filtrar por estado 'Activo'
+
+                // Extraer categorías únicas
+                allProducts.forEach(product => {
+                    if (product.category) {
+                        categories.add(product.category);
+                    }
+                });
+
+                renderCategoryFilters();
+                renderProducts('Todos'); // Mostrar todos los productos por defecto
+            } catch (error) {
+                console.error('Error al cargar los productos:', error);
+                showCustomAlert('Error al cargar los productos. Por favor, verifica la URL del Google Sheet y tu conexión a internet.');
+                document.getElementById('productGrid').innerHTML = '<p class="text-center text-red-500 col-span-full">Error al cargar los productos.</p>';
+            }
+        }
+
+        /**
+         * Renderiza los botones de filtro de categoría.
+         */
+        function renderCategoryFilters() {
+            const categoryFiltersDiv = document.getElementById('categoryFilters');
+            // Limpiar filtros existentes, manteniendo el botón "Todos"
+            categoryFiltersDiv.innerHTML = '<button class="px-4 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 active-category" data-category="Todos">Todos</button>';
+
+            // Añadir botones para cada categoría única
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.setAttribute('data-category', category);
+                button.classList.add('px-4', 'py-2', 'rounded-full', 'bg-gray-200', 'text-gray-700', 'font-semibold', 'hover:bg-gray-300', 'focus:outline-none', 'focus:ring-2', 'focus:ring-gray-400', 'focus:ring-opacity-50', 'transition-all', 'duration-200');
+                categoryFiltersDiv.appendChild(button);
+            });
+
+            // Añadir evento de clic a los filtros de categoría
+            categoryFiltersDiv.addEventListener('click', (event) => {
+                if (event.target.tagName === 'BUTTON') {
+                    // Remover clase 'active-category' de todos los botones
+                    document.querySelectorAll('#categoryFilters button').forEach(btn => {
+                        btn.classList.remove('active-category', 'bg-blue-600', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    // Añadir clase 'active-category' al botón clickeado
+                    event.target.classList.add('active-category', 'bg-blue-600', 'text-white');
+                    event.target.classList.remove('bg-gray-200', 'text-gray-700');
+
+                    const selectedCategory = event.target.getAttribute('data-category');
+                    renderProducts(selectedCategory);
+                }
+            });
+        }
+
+        /**
+         * Renderiza las tarjetas de productos en la cuadrícula.
+         * Si la categoría es 'Todos', los productos se agrupan y ordenan por categoría.
+         */
+        function renderProducts(filterCategory) {
+            const productGrid = document.getElementById('productGrid');
+            productGrid.innerHTML = ''; // Limpiar productos existentes
+
+            let productsToDisplay = [];
+            if (filterCategory === 'Todos') {
+                // Si es 'Todos', agrupar por categoría y luego ordenar por nombre
+                const groupedProducts = {};
+                allProducts.forEach(product => {
+                    if (!groupedProducts[product.category]) {
+                        groupedProducts[product.category] = [];
+                    }
+                    groupedProducts[product.category].push(product);
+                });
+
+                // Ordenar categorías alfabéticamente
+                const sortedCategories = Array.from(categories).sort();
+
+                sortedCategories.forEach(category => {
+                    if (groupedProducts[category]) {
+                        // Añadir un encabezado para la categoría
+                        const categoryHeader = document.createElement('h2');
+                        categoryHeader.classList.add('col-span-full', 'text-2xl', 'font-bold', 'text-gray-700', 'mt-6', 'mb-4', 'border-b-2', 'border-gray-200', 'pb-2');
+                        categoryHeader.textContent = category;
+                        productGrid.appendChild(categoryHeader);
+
+                        // Ordenar productos dentro de cada categoría por nombre
+                        const sortedCategoryProducts = groupedProducts[category].sort((a, b) =>
+                            a.name.localeCompare(b.name)
+                        );
+
+                        sortedCategoryProducts.forEach(product => {
+                            createProductCard(productGrid, product);
+                        });
+                    }
+                });
+
+            } else {
+                // Si es una categoría específica, filtrar y ordenar por nombre
+                productsToDisplay = allProducts
+                    .filter(product => product.category === filterCategory)
+                    .sort((a, b) => a.name.localeCompare(b.name));
+
+                if (productsToDisplay.length === 0) {
+                    productGrid.innerHTML = `<p class="text-center text-gray-600 col-span-full">No hay productos disponibles en la categoría "${filterCategory}".</p>`;
+                    return;
+                }
+
+                productsToDisplay.forEach(product => {
+                    createProductCard(productGrid, product);
+                });
+            }
+
+            if (allProducts.length === 0) {
+                productGrid.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay productos disponibles.</p>';
+            }
+        }
+
+        /**
+         * Crea y añade una tarjeta de producto al contenedor dado.
+         */
+        function createProductCard(container, product) {
+            const productCard = document.createElement('div');
+            productCard.classList.add(
+                'bg-white', 'rounded-xl', 'shadow-lg', 'overflow-hidden', 'text-center',
+                'p-6', 'transition-all', 'duration-300', 'hover:shadow-xl', 'hover:scale-105',
+                'flex', 'flex-col'
+            );
+
+            // Placeholder para imagen si no hay URL o si falla la carga
+            const imageUrl = product.imageUrl || `https://placehold.co/300x200/e0e0e0/555555?text=${encodeURIComponent(product.name || 'Producto')}`;
+
+            productCard.innerHTML = `
+                <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-cover rounded-md mb-4" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e0e0e0/555555?text=Imagen+no+disponible';">
+                <h3 class="text-xl font-bold text-gray-800 mb-2 flex-grow">${product.name}</h3>
+                <p class="text-gray-600 text-sm mb-3 line-clamp-3">${product.description}</p>
+                <div class="text-2xl font-extrabold text-green-600 mb-4">$${product.price.toFixed(2)}</div>
+                <button data-product-id="${product.id}" class="mt-auto w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all duration-200">
+                    Agregar al Carrito
+                </button>
+            `;
+            container.appendChild(productCard);
+
+            // Añadir listener para el botón "Agregar al Carrito"
+            productCard.querySelector('button').addEventListener('click', (event) => {
+                const productId = event.target.getAttribute('data-product-id');
+                addProductToCart(productId);
+            });
+        }
+
+        /**
+         * Añade un producto al carrito o incrementa su cantidad si ya existe.
+         */
+        function addProductToCart(productId) {
+            const product = allProducts.find(p => p.id == productId); // Usar '==' para comparación flexible de ID
+            if (product) {
+                const existingItem = cart.find(item => item.id == productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ ...product, quantity: 1 });
+                }
+                renderCart();
+                showCustomAlert(`${product.name} ha sido agregado al carrito.`);
+            } else {
+                showCustomAlert('Error: Producto no encontrado.');
+            }
+        }
+
+        /**
+         * Renderiza los productos en el carrito y actualiza el total.
+         */
+        function renderCart() {
+            const cartItemsUl = document.getElementById('cartItems').querySelector('ul');
+            const cartTotalDiv = document.getElementById('cartTotal');
+            cartItemsUl.innerHTML = ''; // Limpiar lista del carrito
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartItemsUl.innerHTML = '<li class="py-3 text-gray-500">El carrito está vacío.</li>';
+            } else {
+                cart.forEach((item, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('py-3', 'flex', 'justify-between', 'items-center', 'text-gray-700');
+                    listItem.innerHTML = `
+                        <div>
+                            <span class="font-semibold">${item.name}</span>
+                            <span class="text-sm text-gray-500"> (x${item.quantity})</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-bold text-gray-800 mr-4">$${(item.price * item.quantity).toFixed(2)}</span>
+                            <button data-product-id="${item.id}" class="remove-item-btn text-red-500 hover:text-red-700 focus:outline-none">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsUl.appendChild(listItem);
+                    total += item.price * item.quantity;
+                });
+            }
+            cartTotalDiv.textContent = `Total: $${total.toFixed(2)}`;
+
+            // Añadir listeners para los botones de eliminar del carrito
+            document.querySelectorAll('.remove-item-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = event.currentTarget.getAttribute('data-product-id');
+                    removeProductFromCart(productId);
+                });
+            });
+        }
+
+        /**
+         * Elimina un producto del carrito o decrementa su cantidad.
+         */
+        function removeProductFromCart(productId) {
+            const existingItemIndex = cart.findIndex(item => item.id == productId);
+            if (existingItemIndex > -1) {
+                if (cart[existingItemIndex].quantity > 1) {
+                    cart[existingItemIndex].quantity--;
+                } else {
+                    cart.splice(existingItemIndex, 1); // Eliminar el item si la cantidad es 1
+                }
+                renderCart();
+            }
+        }
+
+        /**
+         * Genera el mensaje de WhatsApp con los detalles del pedido y abre el enlace.
+         */
+        function sendWhatsAppOrder() {
+            if (cart.length === 0) {
+                showCustomAlert('El carrito está vacío. Agrega productos para enviar un pedido.');
+                return;
+            }
+
+            let orderDetails = "¡Hola! Me gustaría hacer el siguiente pedido:\n\n";
+            let total = 0;
+
+            cart.forEach(item => {
+                orderDetails += `- ${item.name} (x${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}\n`;
+                total += item.price * item.quantity;
+            });
+
+            orderDetails += `\nTotal: $${total.toFixed(2)}`;
+            orderDetails += `\n\n¡Gracias!`;
+
+            const encodedMessage = encodeURIComponent(orderDetails);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+
+            window.open(whatsappUrl, '_blank'); // Abre WhatsApp en una nueva pestaña
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts(); // Cargar productos al cargar la página
+            document.getElementById('checkoutButton').addEventListener('click', sendWhatsAppOrder); // Botón de WhatsApp
+        });
+        
+    <!-- Botón flotante para ir al carrito -->
+    <button id="floatingCartButton" class="floating-button cart hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.023.832l.215 1.5V9.25M12 10.5h8.25a.75.75 0 00.75-.75V6.75a.75.75 0 00-.75-.75H12a.75.75 0 00-.75.75v3.75m-9.75 0l4.125 4.125a3 3 0 004.242 0L20.25 10.5M1.5 18.75h16.5a1.5 1.5 0 001.5-1.5v-4.5a1.5 1.5 0 00-1.5-1.5H1.5a1.5 1.5 0 00-1.5 1.5v4.5a1.5 1.5 0 001.5 1.5z" />
+        </svg>
+    </button>
+
+    <!-- Botón flotante para contacto directo por WhatsApp -->
+    <button id="floatingWhatsappButton" class="floating-button whatsapp">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.04 2C7.34 2 3.56 5.78 3.56 10.48C3.56 12.07 4.01 13.59 4.81 14.9L3.1 20.78L9.14 19.11C10.37 19.78 11.68 20.12 13.04 20.12C17.74 20.12 21.52 16.34 21.52 11.64C21.52 6.94 17.74 2 12.04 2ZM17.27 15.42C17.02 15.92 14.2 17.36 13.78 17.41C13.36 17.46 13.03 17.41 12.61 17.29C12.19 17.16 10.96 16.76 9.68 15.6C8.63 14.53 7.95 13.32 7.74 12.9C7.53 12.48 7.33 12.16 7.08 11.66C6.83 11.16 6.58 10.51 6.58 9.86C6.58 9.21 7.02 8.99 7.27 8.74C7.47 8.54 7.74 8.32 8.01 8.05C8.28 7.78 8.55 7.51 8.76 7.24C8.97 6.97 9.19 6.75 9.46 6.75C9.73 6.75 9.94 6.75 10.15 6.75C10.36 6.75 10.63 6.75 10.85 7.02C11.12 7.29 11.39 7.56 11.66 7.83C11.93 8.1 12.15 8.32 12.36 8.59C12.57 8.86 12.79 9.13 13.06 9.4C13.33 9.67 13.55 9.89 13.76 10.16C13.97 10.43 14.19 10.7 14.46 10.97C14.73 11.24 14.95 11.46 15.16 11.73C15.37 12 15.59 12.27 15.86 12.54C16.13 12.81 16.35 13.03 16.56 13.3C16.77 13.57 17 13.84 17.27 14.11C17.54 14.38 17.76 14.6 17.97 14.87C18.18 15.14 18.4 15.41 18.67 15.68C18.94 15.95 19.16 16.17 19.37 16.44C19.58 16.71 19.8 16.98 20.07 17.25C20.34 17.52 20.56 17.74 20.77 18.01C20.98 18.28 21.2 18.55 21.47 18.82C21.74 19.09 21.96 19.31 22.17 19.58C22.38 19.85 22.6 20.12 22.87 20.39C23.14 20.66 23.36 20.88 23.57 21.15C23.78 21.42 23.99 21.69 24.27 21.96C24.54 22.23 24.76 22.45 24.97 22.72C25.18 22.99 25.4 23.26 25.67 23.53C25.94 23.8 26.16 24.02 26.37 24.29C26.58 24.56 26.8 24.83 27.07 25.1C27.34 25.37 27.56 25.59 27.77 25.86C27.98 26.13 28.2 26.4 28.47 26.67C28.74 26.94 28.96 27.16 29.17 27.43C29.38 27.7 29.6 27.97 29.87 28.24C30.14 28.51 30.36 28.73 30.57 29C30.78 29.27 31 29.54 31.27 29.81C31.54 30.08 31.76 30.3 31.97 30.57C32.18 30.84 32.4 31.11 32.67 31.38C32.94 31.65 33.16 31.87 33.37 32.14C33.58 32.41 33.8 32.68 34.07 32.95C34.34 33.22 34.56 33.44 34.77 33.71C34.98 33.98 35.2 34.25 35.47 34.52C35.74 34.79 35.96 35.01 36.17 35.28C36.38 35.55 36.6 35.82 36.87 36.09C37.14 36.36 37.36 36.58 37.57 36.85C37.78 37.12 38 37.39 38.27 37.66C38.54 37.93 38.76 38.15 38.97 38.42C39.18 38.69 39.4 38.96 39.67 39.23C39.94 39.5 40.16 39.72 40.37 39.99C40.58 40.26 40.8 40.53 41.07 40.8C41.34 41.07 41.56 41.29 41.77 41.56C41.98 41.83 42.2 42.1 42.47 42.37C42.74 42.64 42.96 42.86 43.17 43.13C43.38 43.4 43.6 43.67 43.87 43.94C44.14 44.21 44.36 44.43 44.57 44.7C44.78 44.97 45 45.24 45.27 45.51C45.54 45.78 45.76 46 45.97 46.27C46.18 46.54 46.4 46.81 46.67 47.08C46.94 47.35 47.16 47.57 47.37 47.84C47.58 48.11 47.8 48.38 48.07 48.65C48.34 48.92 48.56 49.14 48.77 49.41C48.98 49.68 49.2 49.95 49.47 50.22C49.74 50.49 49.96 50.71 50.17 50.98C50.38 51.25 50.6 51.52 50.87 51.79C51.14 52.06 51.36 52.28 51.57 52.55C51.78 52.82 52 53.09 52.27 53.36C52.54 53.63 52.76 53.85 52.97 54.12C53.18 54.39 53.4 54.66 53.67 54.93C53.94 55.2 54.16 55.42 54.37 55.69C54.58 55.96 54.8 56.23 55.07 56.5C55.34 56.77 55.56 56.99 55.77 57.26C55.98 57.53 56.2 57.8 56.47 58.07C56.74 58.34 56.96 58.56 57.17 58.83C57.38 59.1 57.6 59.37 57.87 59.64C58.14 59.91 58.36 60.13 58.57 60.4C58.78 60.67 59 60.94 59.27 61.21C59.54 61.48 59.76 61.7 59.97 61.97C60.18 62.24 60.4 62.51 60.67 62.78C60.94 63.05 61.16 63.27 61.37 63.54C61.58 63.81 61.8 64.08 62.07 64.35C62.34 64.62 62.56 64.84 62.77 65.11C62.98 65.38 63.2 65.65 63.47 65.92C63.74 66.19 63.96 66.41 64.17 66.68C64.38 66.95 64.6 67.22 64.87 67.49C65.14 67.76 65.36 67.98 65.57 68.25C65.78 68.52 66 68.79 66.27 69.06C66.54 69.33 66.76 69.55 66.97 69.82C67.18 70.09 67.4 70.36 67.67 70.63C67.94 70.9 68.16 71.12 68.37 71.39C68.58 71.66 68.8 71.93 69.07 72.2C69.34 72.47 69.56 72.69 69.77 72.96C69.98 73.23 70.2 73.5 70.47 73.77C70.74 74.04 70.96 74.26 71.17 74.53C71.38 74.8 71.6 75.07 71.87 75.34C72.14 75.61 72.36 75.83 72.57 76.1C72.78 76.37 73 76.64 73.27 76.91C73.54 77.18 73.76 77.4 73.97 77.67C74.18 77.94 74.4 78.21 74.67 78.48C74.94 78.75 75.16 78.97 75.37 79.24C75.58 79.51 75.8 79.78 76.07 80.05C76.34 80.32 76.56 80.54 76.77 80.81C76.98 81.08 77.2 81.35 77.47 81.62C77.74 81.89 77.96 82.11 78.17 82.38C78.38 82.65 78.6 82.92 78.87 83.19C79.14 83.46 79.36 83.68 79.57 83.95C79.78 84.22 88.67 94.18C88.94 94.45 89.16 94.67 89.37 94.94C89.58 95.21 89.8 95.48 90.07 95.75C90.34 96.02 90.56 96.24 90.77 96.51C90.98 96.78 91.2 97.05 91.47 97.32C91.74 97.59 91.96 97.81 92.17 98.08C92.38 98.35 92.6 98.62 92.87 98.89C93.14 99.16 93.36 99.38 93.57 99.65C93.78 99.92 94 100.19 94.27 100.46C94.54 100.73 94.76 100.95 94.97 101.22C95.18 101.49 95.4 101.76 95.67 102.03C95.94 102.3 96.16 102.52 96.37 102.79C96.58 103.06 96.8 103.33 97.07 103.6C97.34 103.87 97.56 104.09 97.77 104.36C97.98 104.63 98.2 104.9 98.47 105.17C98.74 105.44 98.96 105.66 99.17 105.93C99.38 106.2 99.6 106.47 99.87 106.74C100.14 107.01 100.36 107.23 100.57 107.5C100.78 107.77 101 108.04 101.27 108.31C101.54 108.58 101.76 108.8 101.97 109.07C102.18 109.34 102.4 109.61 102.67 109.88C102.94 110.15 103.16 110.37 103.37 110.64C103.58 110.91 103.8 111.18 104.07 111.45C104.34 111.72 104.56 111.94 104.77 112.21C104.98 112.48 105.2 112.75 105.47 113.02C105.74 113.29 105.96 113.51 106.17 113.78C106.38 114.05 106.6 114.32 106.87 114.59C107.14 114.86 107.36 115.08 107.57 115.35C107.78 115.62 108 115.89 108.27 116.16C108.54 116.43 108.76 116.65 108.97 116.92C109.18 117.19 109.4 117.46 109.67 117.73C109.94 118 110.16 118.22 110.37 118.49C110.58 118.76 110.8 119.03 111.07 119.3C111.34 119.57 111.56 119.79 111.77 120.06C111.98 120.33 112.2 120.6 112.47 120.87C112.74 121.14 112.96 121.36 113.17 121.63C113.38 121.9 113.6 122.17 113.87 122.44C114.14 122.71 114.36 122.93 114.57 123.2C114.78 123.47 115 123.74 115.27 124.01C115.54 124.28 115.76 124.5 115.97 124.77C116.18 125.04 116.4 125.31 116.67 125.58C116.94 125.85 117.16 126.07 117.37 126.34C117.58 126.61 117.8 126.88 118.07 127.15C118.34 127.42 118.56 127.64 118.77 127.91C118.98 128.18 119.2 128.45 119.47 128.72C119.74 128.99 119.96 129.21 120.17 129.48C120.38 129.75 120.6 130.02 120.87 130.29C121.14 130.56 121.36 130.78 121.57 131.05C121.78 131.32 122 131.59 122.27 131.86C122.54 132.13 122.76 132.35 122.97 132.62C123.18 132.89 123.4 133.16 123.67 133.43C123.94 133.7 124.16 133.92 124.37 134.19C124.58 134.46 124.8 134.73 125.07 135C125.34 135.27 125.56 135.49 125.77 135.76C125.98 136.03 126.2 136.3 126.47 136.57C126.74 136.84 126.96 137.06 127.17 137.33C127.38 137.6 127.6 137.87 127.87 138.14C128.14 138.41 128.36 138.63 128.57 138.9C128.78 139.17 129 139.44 129.27 139.71C129.54 139.98 129.76 140.2 129.97 140.47C130.18 140.74 130.4 141.01 130.67 141.28C130.94 141.55 131.16 141.77 131.37 142.04C131.58 142.31 131.8 142.58 132.07 142.85C132.34 143.12 132.56 143.34 132.77 143.61C132.98 143.88 133.2 144.15 133.47 144.42C133.74 144.69 133.96 144.91 134.17 145.18C134.38 145.45 134.6 145.72 134.87 145.99C135.14 146.26 135.36 146.48 135.57 146.75C135.78 147.02 136 147.29 136.27 147.56C136.54 147.83 136.76 148.05 136.97 148.32C137.18 148.59 137.4 148.86 137.67 149.13C137.94 149.4 138.16 149.62 138.37 149.89C138.58 150.16 138.8 150.43 139.07 150.7C139.34 150.97 139.56 151.19 139.77 151.46C139.98 151.73 140.2 152 140.47 152.27C140.74 152.54 140.96 152.76 141.17 153.03C141.38 153.3 141.6 153.57 141.87 153.84C142.14 154.11 142.36 154.33 142.57 154.6C142.78 154.87 143 155.14 143.27 155.41C143.54 155.68 143.76 155.9 143.97 156.17C144.18 156.44 144.4 156.71 144.67 156.98C144.94 157.25 145.16 157.47 145.37 157.74C145.58 158.01 145.8 158.28 146.07 158.55C146.34 158.82 146.56 159.04 146.77 159.31C146.98 159.58 147.2 159.85 147.47 160.12C147.74 160.39 147.96 160.61 148.17 160.88C148.38 161.15 148.6 161.42 148.87 161.69C149.14 161.96 149.36 162.18 149.57 162.45C149.78 162.72 150 162.99 150.27 163.26C150.54 163.53 150.76 163.75 150.97 164.02C151.18 164.29 151.4 164.56 151.67 164.83C151.94 165.1 152.16 165.32 152.37 165.59C152.58 165.86 152.8 166.13 153.07 166.4C153.34 166.67 153.56 166.89 153.77 167.16C153.98 167.43 154.2 167.7 154.47 167.97C154.74 168.24 154.96 168.46 155.17 168.73C155.38 169 155.6 169.27 155.87 169.54C156.14 169.81 156.36 169.99 156.57 170.3C156.78 170.57 157 170.84 157.27 171.11C157.54 171.38 157.76 171.6 157.97 171.87C158.18 172.14 158.4 172.41 158.67 172.68C158.94 172.95 159.16 173.17 159.37 173.44C159.58 173.71 159.8 173.98 160.07 174.25C160.34 174.52 160.56 174.74 160.77 175.01C160.98 175.28 161.2 175.55 161.47 175.82C161.74 176.09 161.96 176.31 162.17 176.58C162.38 176.85 162.6 177.12 162.87 177.39C163.14 177.66 163.36 177.88 163.57 178.15C163.78 178.42 164 178.69 164.27 178.96C164.54 179.23 164.76 179.45 164.97 179.72C165.18 179.99 165.4 180.26 165.67 180.53C165.94 180.8 166.16 181.02 166.37 181.29C166.58 181.56 166.8 181.83 167.07 182.1C167.34 182.37 167.56 182.59 167.77 182.86C167.98 183.13 168.2 183.4 168.47 183.67C168.74 183.94 168.96 184.16 169.17 184.43C169.38 184.7 169.6 184.97 169.87 185.24C170.14 185.51 170.36 185.73 170.57 186C170.78 186.27 171 186.54 171.27 186.81C171.54 187.08 171.76 187.3 171.97 187.57C172.18 187.84 172.4 188.11 172.67 188.38C172.94 188.65 173.16 188.87 173.37 189.14C173.58 189.41 173.8 189.68 174.07 189.95C174.34 190.22 174.56 190.44 174.77 190.71C174.98 190.98 175.2 191.25 175.47 191.52C175.74 191.79 175.96 192.01 176.17 192.28C176.38 192.55 176.6 192.82 176.87 193.09C177.14 193.36 177.36 193.58 177.57 193.85C177.78 194.12 178 194.39 178.27 194.66C178.54 194.93 178.76 195.15 178.97 195.42C179.18 195.69 179.4 195.96 179.67 196.23C179.94 196.5 180.16 196.72 180.37 196.99C180.58 197.26 180.8 197.53 181.07 197.8C181.34 198.07 181.56 198.29 181.77 198.56C181.98 198.83 182.2 199.1 182.47 199.37C182.74 199.64 182.96 199.86 183.17 200.13C183.38 200.4 183.6 200.67 183.87 200.94C184.14 201.21 184.36 201.43 184.57 201.7C184.78 201.97 185 202.24 185.27 202.51C185.54 202.78 185.76 203 185.97 203.27C186.18 203.54 186.4 203.81 186.67 204.08C186.94 204.35 187.16 204.57 187.37 204.84C187.58 205.11 187.8 205.38 188.07 205.65C188.34 205.92 188.56 206.14 188.77 206.41C188.98 206.68 189.2 206.95 189.47 207.22C189.74 207.49 189.96 207.71 190.17 207.98C190.38 208.25 190.6 208.52 190.87 208.79C191.14 209.06 191.36 209.28 191.57 209.55C191.78 209.82 192 210.09 192.27 210.36C192.54 210.63 192.76 210.85 192.97 211.12C193.18 211.39 193.4 211.66 193.67 211.93C193.94 212.2 194.16 212.42 194.37 212.69C194.58 212.96 194.8 213.23 195.07 213.5C195.34 213.77 195.56 213.99 195.77 214.26C195.98 214.53 196.2 214.8 196.47 215.07C196.74 215.34 196.96 215.56 197.17 215.83C197.38 216.1 197.6 216.37 197.87 216.64C198.14 216.91 198.36 217.13 198.57 217.4C198.78 217.67 199 217.94 199.27 218.21C199.54 218.48 199.76 218.7 199.97 218.97C200.18 219.24 200.4 219.51 200.67 219.78C200.94 220.05 201.16 220.27 201.37 220.54C201.58 220.81 201.8 221.08 202.07 221.35C202.34 221.62 202.56 221.84 202.77 222.11C202.98 222.38 203.2 222.65 203.47 222.92C203.74 223.19 203.96 223.41 204.17 223.68C204.38 223.95 204.6 224.22 204.87 224.49C205.14 224.76 205.36 224.98 205.57 225.25C205.78 225.52 206 225.79 206.27 226.06C206.54 226.33 206.76 226.55 206.97 226.82C207.18 227.09 207.4 227.36 207.67 227.63C207.94 227.9 208.16 228.12 208.37 228.39C208.58 228.66 208.8 228.93 209.07 229.2C209.34 229.47 209.56 229.69 209.77 229.96C209.98 230.23 210.2 230.5 210.47 230.77C210.74 231.04 210.96 231.26 211.17 231.53C211.38 231.8 211.6 232.07 211.87 232.34C212.14 232.61 212.36 232.83 212.57 233.1C212.78 233.37 213 233.64 213.27 233.91C213.54 234.18 213.76 234.4 213.97 234.67C214.18 234.94 214.4 235.21 214.67 235.48C214.94 235.75 215.16 235.97 215.37 236.24C215.58 236.51 215.8 236.78 216.07 237.05C216.34 237.32 216.56 237.54 216.77 237.81C216.98 238.08 217.2 238.35 217.47 238.62C217.74 238.89 217.96 239.11 218.17 239.38C218.38 239.65 218.6 239.92 218.87 240.19C219.14 240.46 219.36 240.68 219.57 240.95C219.78 241.22 220 241.49 220.27 241.76C220.54 242.03 220.76 242.25 220.97 242.52C221.18 242.79 221.4 243.06 221.67 243.33C221.94 243.6 222.16 243.82 222.37 244.09C222.58 244.36 222.8 244.63 223.07 244.9C223.34 245.17 223.56 245.39 223.77 245.66C223.98 245.93 224.2 246.2 224.47 246.47C224.74 246.74 224.96 246.96 225.17 247.23C225.38 247.5 225.6 247.77 225.87 248.04C226.14 248.31 226.36 248.53 226.57 248.8C226.78 249.07 227 249.34 227.27 249.61C227.54 249.88 227.76 250.1 227.97 250.37C228.18 250.64 228.4 250.91 228.67 251.18C228.94 251.45 229.16 251.67 229.37 251.94C229.58 252.21 229.8 252.48 230.07 252.75C230.34 253.02 230.56 253.24 230.77 253.51C230.98 253.78 231.2 254.05 231.47 254.32C231.74 254.59 231.96 254.81 232.17 255.08C232.38 255.35 232.6 255.62 232.87 255.89C233.14 256.16 233.36 256.38 233.57 256.65C233.78 256.92 234 257.19 234.27 257.46C234.54 257.73 234.76 257.95 234.97 258.22C235.18 258.49 235.4 258.76 235.67 259.03C235.94 259.3 236.16 259.52 236.37 259.79C236.58 260.06 236.8 260.33 237.07 260.6C237.34 260.87 237.56 261.09 237.77 261.36C237.98 261.63 238.2 261.9 238.47 262.17C238.74 262.44 238.96 262.66 239.17 262.93C239.38 263.2 239.6 263.47 239.87 263.74C240.14 264.01 240.36 264.23 240.57 264.5C240.78 264.77 241 265.04 241.27 265.31C241.54 265.58 241.76 265.8 241.97 266.07C242.18 266.34 242.4 266.61 242.67 266.88C242.94 267.15 243.16 267.37 243.37 267.64C243.58 267.91 243.8 268.18 244.07 268.45C244.34 268.72 244.56 268.94 244.77 269.21C244.98 269.48 245.2 269.75 245.47 270.02C245.74 270.29 245.96 270.51 246.17 270.78C246.38 271.05 246.6 271.32 246.87 271.59C247.14 271.86 247.36 272.08 247.57 272.35C247.78 272.62 248 272.89 248.27 273.16C248.54 273.43 248.76 273.65 248.97 273.92C249.18 274.19 249.4 274.46 249.67 274.73C249.94 275 250.16 275.22 250.37 275.49C250.58 275.76 250.8 276.03 251.07 276.3C251.34 276.57 251.56 276.79 251.77 277.06C251.98 277.33 252.2 277.6 252.47 277.87C252.74 278.14 252.96 278.36 253.17 278.63C253.38 278.9 253.6 279.17 253.87 279.44C254.14 279.71 254.36 279.93 254.57 280.2C254.78 280.47 255 280.74 255.27 281.01C255.54 281.28 255.76 281.5 255.97 281.77C256.18 282.04 256.4 282.31 256.67 282.58C256.94 282.85 257.16 283.07 257.37 283.34C257.58 283.61 257.8 283.88 258.07 284.15C258.34 284.42 258.56 284.64 258.77 284.91C258.98 285.18 259.2 285.45 259.47 285.72C259.74 285.99 259.96 286.21 260.17 286.48C260.38 286.75 260.6 287.02 260.87 287.29C261.14 287.56 261.36 287.78 261.57 288.05C261.78 288.32 262 288.59 262.27 288.86C262.54 289.13 262.76 289.35 262.97 289.62C263.18 289.89 263.4 290.16 263.67 290.43C263.94 290.7 264.16 290.92 264.37 291.19C264.58 291.46 264.8 291.73 265.07 292C265.34 292.27 265.56 292.49 265.77 292.76C265.98 293.03 266.2 293.3 266.47 293.57C266.74 293.84 266.96 294.06 267.17 294.33C267.38 294.6 267.6 294.87 267.87 295.14C268.14 295.41 268.36 295.63 268.57 295.9C268.78 296.17 269 296.44 269.27 296.71C269.54 296.98 269.76 297.2 269.97 297.47C270.18 297.74 270.4 298.01 270.67 298.28C270.94 298.55 271.16 298.77 271.37 299.04C271.58 299.31 271.8 299.58 272.07 299.85C272.34 300.12 272.56 300.34 272.77 300.61C272.98 300.88 273.2 301.15 273.47 301.42C273.74 301.69 273.96 301.91 274.17 302.18C274.38 302.45 274.6 302.72 274.87 302.99C275.14 303.26 275.36 303.48 275.57 303.75C275.78 304.02 276 304.29 276.27 304.56C276.54 304.83 276.76 305.05 276.97 305.32C277.18 305.59 277.4 305.86 277.67 306.13C277.94 306.4 278.16 306.62 278.37 306.89C278.58 307.16 278.8 307.43 279.07 307.7C279.34 307.97 279.56 308.19 279.77 308.46C279.98 308.73 280.2 309 280.47 309.27C280.74 309.54 280.96 309.76 281.17 310.03C281.38 310.3 281.6 310.57 281.87 310.84C282.14 311.11 282.36 311.33 282.57 311.6C282.78 311.87 283 312.14 283.27 312.41C283.54 312.68 283.76 312.9 283.97 313.17C284.18 313.44 284.4 313.71 284.67 313.98C284.94 314.25 285.16 314.47 285.37 314.74C285.58 315.01 285.8 315.28 286.07 315.55C286.34 315.82 286.56 316.04 286.77 316.31C286.98 316.58 287.2 316.85 287.47 317.12C287.74 317.39 287.96 317.61 288.17 317.88C288.38 318.15 288.6 318.42 288.87 318.69C289.14 318.96 289.36 319.18 289.57 319.45C289.78 319.72 290 319.99 290.27 320.26C290.54 320.53 290.76 320.75 290.97 321.02C291.18 321.29 291.4 321.56 291.67 321.83C291.94 322.1 292.16 322.32 292.37 322.59C292.58 322.86 292.8 323.13 293.07 323.4C293.34 323.67 293.56 323.89 293.77 324.16C293.98 324.43 294.2 324.7 294.47 324.97C294.74 325.24 294.96 325.46 295.17 325.73C295.38 326 295.6 326.27 295.87 326.54C296.14 326.81 296.36 327.03 296.57 327.3C296.78 327.57 297 327.84 297.27 328.11C297.54 328.38 297.76 328.6 297.97 328.87C298.18 329.14 298.4 329.41 298.67 329.68C298.94 329.95 299.16 330.17 299.37 330.44C299.58 330.71 299.8 330.98 300.07 331.25C300.34 331.52 300.56 331.74 300.77 332.01C300.98 332.28 301.2 332.55 301.47 332.82C301.74 333.09 301.96 333.31 302.17 333.58C302.38 333.85 302.6 334.12 302.87 334.39C303.14 334.66 303.36 334.88 303.57 335.15C303.78 335.42 304 335.69 304.27 335.96C304.54 336.23 304.76 336.45 304.97 336.72C305.18 336.99 305.4 337.26 305.67 337.53C305.94 337.8 306.16 338.02 306.37 338.29C306.58 338.56 306.8 338.83 307.07 339.1C307.34 339.37 307.56 339.59 307.77 339.86C307.98 340.13 308.2 340.4 308.47 340.67C308.74 340.94 308.96 341.16 309.17 341.43C309.38 341.7 309.6 341.97 309.87 342.24C310.14 342.51 310.36 342.73 310.57 343C310.78 343.27 311 343.54 311.27 343.81C311.54 344.08 311.76 344.3 311.97 344.57C312.18 344.84 312.4 345.11 312.67 345.38C312.94 345.65 313.16 345.87 313.37 346.14C313.58 346.41 313.8 346.68 314.07 346.95C314.34 347.22 314.56 347.44 314.77 347.71C314.98 347.98 315.2 348.25 315.47 348.52C315.74 348.79 315.96 349.01 316.17 349.28C316.38 349.55 316.6 349.82 316.87 350.09C317.14 350.36 317.36 350.58 317.57 350.85C317.78 351.12 318 351.39 318.27 351.66C318.54 351.93 318.76 352.15 318.97 352.42C319.18 352.69 319.4 352.96 319.67 353.23C319.94 353.5 320.16 353.72 320.37 353.99C320.58 354.26 320.8 354.53 321.07 354.8C321.34 355.07 321.56 355.29 321.77 355.56C321.98 355.83 322.2 356.1 322.47 356.37C322.74 356.64 322.96 356.86 323.17 357.13C323.38 357.4 323.6 357.67 323.87 357.94C324.14 358.21 324.36 358.43 324.57 358.7C324.78 358.97 325 359.24 325.27 359.51C325.54 359.78 325.76 360 325.97 360.27C326.18 360.54 326.4 360.81 326.67 361.08C326.94 361.35 327.16 361.57 327.37 361.84C327.58 362.11 327.8 362.38 328.07 362.65C328.34 362.92 328.56 363.14 328.77 363.41C328.98 363.68 329.2 363.95 329.47 364.22C329.74 364.49 329.96 364.71 330.17 364.98C330.38 365.25 330.6 365.52 330.87 365.79C331.14 366.06 331.36 366.28 331.57 366.55C331.78 366.82 332 367.09 332.27 367.36C332.54 367.63 332.76 367.85 332.97 368.12C333.18 368.39 333.4 368.66 333.67 368.93C333.94 369.2 334.16 369.42 334.37 369.69C334.58 369.96 334.8 370.23 335.07 370.5C335.34 370.77 335.56 370.99 335.77 371.26C335.98 371.53 336.2 371.8 336.47 372.07C336.74 372.34 336.96 372.56 337.17 372.83C337.38 373.1 337.6 373.37 337.87 373.64C338.14 373.91 338.36 374.13 338.57 374.4C338.78 374.67 339 374.94 339.27 375.21C339.54 375.48 339.76 375.7 339.97 375.97C340.18 376.24 340.4 376.51 340.67 376.78C340.94 377.05 341.16 377.27 341.37 377.54C341.58 377.81 341.8 378.08 342.07 378.35C342.34 378.62 342.56 378.84 342.77 379.11C342.98 379.38 343.2 379.65 343.47 379.92C343.74 380.19 343.96 380.41 344.17 380.68C344.38 380.95 344.6 381.22 344.87 381.49C345.14 381.76 345.36 381.98 345.57 382.25C345.78 382.52 346 382.79 346.27 383.06C346.54 383.33 346.76 383.55 346.97 383.82C347.18 384.09 347.4 384.36 347.67 384.63C347.94 384.9 348.16 385.12 348.37 385.39C348.58 385.66 348.8 385.93 349.07 386.2C349.34 386.47 349.56 386.69 349.77 386.96C349.98 387.23 350.2 387.5 350.47 387.77C350.74 388.04 350.96 388.26 351.17 388.53C351.38 388.8 351.6 389.07 351.87 389.34C352.14 389.61 352.36 389.83 352.57 390.1C352.78 390.37 353 390.64 353.27 390.91C353.54 391.18 353.76 391.4 353.97 391.67C354.18 391.94 354.4 392.21 354.67 392.48C354.94 392.75 355.16 392.97 355.37 393.24C355.58 393.51 355.8 393.78 356.07 394.05C356.34 394.32 356.56 394.54 356.77 394.81C356.98 395.08 357.2 395.35 357.47 395.62C357.74 395.89 357.96 396.11 358.17 396.38C358.38 396.65 358.6 396.92 358.87 397.19C359.14 397.46 359.36 397.68 359.57 397.95C359.78 398.22 360 398.49 360.27 398.76C360.54 399.03 360.76 399.25 360.97 399.52C361.18 399.79 361.4 400.06 361.67 400.33C361.94 400.6 362.16 400.82 362.37 401.09C362.58 401.36 362.8 401.63 363.07 401.9C363.34 402.17 363.56 402.39 363.77 402.66C363.98 402.93 364.2 403.2 364.47 403.47C364.74 403.74 364.96 403.96 365.17 404.23C365.38 404.5 365.6 404.77 365.87 405.04C366.14 405.31 366.36 405.53 366.57 405.8C366.78 406.07 367 406.34 367.27 406.61C367.54 406.88 367.76 407.1 367.97 407.37C368.18 407.64 368.4 407.91 368.67 408.18C368.94 408.45 369.16 408.67 369.37 408.94C369.58 409.21 369.8 409.48 370.07 409.75C370.34 410.02 370.56 410.24 370.77 410.51C370.98 410.78 371.2 411.05 371.47 411.32C371.74 411.59 371.96 411.81 372.17 412.08C372.38 412.35 372.6 412.62 372.87 412.89C373.14 413.16 373.36 413.38 373.57 413.65C373.78 413.92 374 414.19 374.27 414.46C374.54 414.73 374.76 414.95 374.97 415.22C375.18 415.49 375.4 415.76 375.67 416.03C375.94 416.3 376.16 416.52 376.37 416.79C376.58 417.06 376.8 417.33 377.07 417.6C377.34 417.87 377.56 418.09 377.77 418.36C377.98 418.63 378.2 418.9 378.47 419.17C378.74 419.44 378.96 419.66 379.17 419.93C379.38 420.2 379.6 420.47 379.87 420.74C380.14 421.01 380.36 421.23 380.57 421.5C380.78 421.77 381 422.04 381.27 422.31C381.54 422.58 381.76 422.8 381.97 423.07C382.18 423.34 382.4 423.61 382.67 423.88C382.94 424.15 383.16 424.37 383.37 424.64C383.58 424.91 383.8 425.18 384.07 425.45C384.34 425.72 384.56 425.94 384.77 426.21C384.98 426.48 385.2 426.75 385.47 427.02C385.74 427.29 385.96 427.51 386.17 427.78C386.38 428.05 386.6 428.32 386.87 428.59C387.14 428.86 387.36 429.08 387.57 429.35C387.78 429.62 388 429.89 388.27 430.16C388.54 430.43 388.76 430.65 388.97 430.92C389.18 431.19 389.4 431.46 389.67 431.73C389.94 432 390.16 432.22 390.37 432.49C390.58 432.76 390.8 433.03 391.07 433.3C391.34 433.57 391.56 433.79 391.77 434.06C391.98 434.33 392.2 434.6 392.47 434.87C392.74 435.14 392.96 435.36 393.17 435.63C393.38 435.9 393.6 436.17 393.87 436.44C394.14 436.71 394.36 436.93 394.57 437.2C394.78 437.47 395 437.74 395.27 438.01C395.54 438.28 395.76 438.5 395.97 438.77C396.18 439.04 396.4 439.31 396.67 439.58C396.94 439.85 397.16 440.07 397.37 440.34C397.58 440.61 397.8 440.88 398.07 441.15C398.34 441.42 398.56 441.64 398.77 441.91C398.98 442.18 399.2 442.45 399.47 442.72C399.74 442.99 399.96 443.21 400.17 443.48C400.38 443.75 400.6 444.02 400.87 444.29C401.14 444.56 401.36 444.78 401.57 445.05C401.78 445.32 402 445.59 402.27 445.86C402.54 446.13 402.76 446.35 402.97 446.62C403.18 446.89 403.4 447.16 403.67 447.43C403.94 447.7 404.16 447.92 404.37 448.19C404.58 448.46 404.8 448.73 405.07 449C405.34 449.27 405.56 449.49 405.77 449.76C405.98 450.03 406.2 450.3 406.47 450.57C406.74 450.84 406.96 451.06 407.17 451.33C407.38 451.6 407.6 451.87 407.87 452.14C408.14 452.41 408.36 452.63 408.57 452.9C408.78 453.17 409 453.44 409.27 453.71C409.54 453.98 409.76 454.2 409.97 454.47C410.18 454.74 410.4 455.01 410.67 455.28C410.94 455.55 411.16 455.77 411.37 456.04C411.58 456.31 411.8 456.58 412.07 456.85C412.34 457.12 412.56 457.34 412.77 457.61C412.98 457.88 413.2 458.15 413.47 458.42C413.74 458.69 413.96 458.91 414.17 459.18C414.38 459.45 414.6 459.72 414.87 459.99C415.14 460.26 415.36 460.48 415.57 460.75C415.78 461.02 416 461.29 416.27 461.56C416.54 461.83 416.76 462.05 416.97 462.32C417.18 462.59 417.4 462.86 417.67 463.13C417.94 463.4 418.16 463.62 418.37 463.89C418.58 464.16 418.8 464.43 419.07 464.7C419.34 464.97 419.56 465.19 419.77 465.46C419.98 465.73 420.2 466 420.47 466.27C420.74 466.54 420.96 466.76 421.17 467.03C421.38 467.3 421.6 467.57 421.87 467.84C422.14 468.11 422.36 468.33 422.57 468.6C422.78 468.87 423 469.14 423.27 469.41C423.54 469.68 423.76 469.9 423.97 470.17C424.18 470.44 424.4 470.71 424.67 470.98C424.94 471.25 425.16 471.47 425.37 471.74C425.58 472.01 425.8 472.28 426.07 472.55C426.34 472.82 426.56 473.04 426.77 473.31C426.98 473.58 427.2 473.85 427.47 474.12C427.74 474.39 427.96 474.61 428.17 474.88C428.38 475.15 428.6 475.42 428.87 475.69C429.14 475.96 429.36 476.18 429.57 476.45C429.78 476.72 430 476.99 430.27 477.26C430.54 477.53 430.76 477.75 430.97 478.02C431.18 478.29 431.4 478.56 431.67 478.83C431.94 479.1 432.16 479.32 432.37 479.59C432.58 479.86 432.8 480.13 433.07 480.4C433.34 480.67 433.56 480.89 433.77 481.16C433.98 481.43 434.2 481.7 434.47 481.97C434.74 482.24 434.96 482.46 435.17 482.73C435.38 483 435.6 483.27 435.87 483.54C436.14 483.81 436.36 484.03 436.57 484.3C436.78 484.57 437 484.84 437.27 485.11C437.54 485.38 437.76 485.6 437.97 485.87C438.18 486.14 438.4 486.41 438.67 486.68C438.94 486.95 439.16 487.17 439.37 487.44C439.58 487.71 439.8 487.98 440.07 488.25C440.34 488.52 440.56 488.74 440.77 489.01C440.98 489.28 441.2 489.55 441.47 489.82C441.74 490.09 441.96 490.31 442.17 490.58C442.38 490.85 442.6 491.12 442.87 491.39C443.14 491.66 443.36 491.88 443.57 492.15C443.78 492.42 444 492.69 444.27 492.96C444.54 493.23 444.76 493.45 444.97 493.72C445.18 493.99 445.4 494.26 445.67 494.53C445.94 494.8 446.16 495.02 446.37 495.29C446.58 495.56 446.8 495.83 447.07 496.1C447.34 496.37 447.56 496.59 447.77 496.86C447.98 497.13 448.2 497.4 448.47 497.67C448.74 497.94 448.96 498.16 449.17 498.43C449.38 498.7 449.6 498.97 449.87 499.24C450.14 499.51 450.36 499.73 450.57 500C450.78 500.27 451 500.54 451.27 500.81C451.54 501.08 451.76 501.3 451.97 501.57C452.18 501.84 452.4 502.11 452.67 502.38C452.94 502.65 453.16 502.87 453.37 503.14C453.58 503.41 453.8 503.68 454.07 503.95C454.34 504.22 454.56 504.44 454.77 504.71C454.98 504.98 455.2 505.25 455.47 505.52C455.74 505.79 455.96 506.01 456.17 506.28C456.38 506.55 456.6 506.82 456.87 507.09C457.14 507.36 457.36 507.58 457.57 507.85C457.78 508.12 458 508.39 458.27 508.66C458.54 508.93 458.76 509.15 458.97 509.42C459.18 509.69 459.4 509.96 459.67 510.23C459.94 510.5 460.16 510.72 460.37 510.99C460.58 511.26 460.8 511.53 461.07 511.8C461.34 512.07 461.56 512.29 461.77 512.56C461.98 512.83 462.2 513.1 462.47 513.37C462.74 513.64 462.96 513.86 463.17 514.13C463.38 514.4 463.6 514.67 463.87 514.94C464.14 515.21 464.36 515.43 464.57 515.7C464.78 515.97 465 516.24 465.27 516.51C465.54 516.78 465.76 517 465.97 517.27C466.18 517.54 466.4 517.81 466.67 518.08C466.94 518.35 467.16 518.57 467.37 518.84C467.58 519.11 467.8 519.38 468.07 519.65C468.34 519.92 468.56 520.14 468.77 520.41C468.98 520.68 469.2 520.95 469.47 521.22C469.74 521.49 469.96 521.71 470.17 521.98C470.38 522.25 470.6 522.52 470.87 522.79C471.14 523.06 471.36 523.28 471.57 523.55C471.78 523.82 472 524.09 472.27 524.36C472.54 524.63 472.76 524.85 472.97 525.12C473.18 525.39 473.4 525.66 473.67 525.93C473.94 526.2 474.16 526.42 474.37 526.69C474.58 526.96 474.8 527.23 475.07 527.5C475.34 527.77 475.56 527.99 475.77 528.26C475.98 528.53 476.2 528.8 476.47 529.07C476.74 529.34 476.96 529.56 477.17 529.83C477.38 530.1 477.6 530.37 477.87 530.64C478.14 530.91 478.36 531.13 478.57 531.4C478.78 531.67 479 531.94 479.27 532.21C479.54 532.48 479.76 532.7 479.97 532.97C480.18 533.24 480.4 533.51 480.67 533.78C480.94 534.05 481.16 534.27 481.37 534.54C481.58 534.81 481.8 535.08 482.07 535.35C482.34 535.62 482.56 535.84 482.77 536.11C482.98 536.38 483.2 536.65 483.47 536.92C483.74 537.19 483.96 537.41 484.17 537.68C484.38 537.95 484.6 538.22 484.87 538.49C485.14 538.76 485.36 538.98 485.57 539.25C485.78 539.52 486 539.79 486.27 540.06C486.54 540.33 486.76 540.55 486.97 540.82C487.18 541.09 487.4 541.36 487.67 541.63C487.94 541.9 488.16 542.12 488.37 542.39C488.58 542.66 488.8 542.93 489.07 543.2C489.34 543.47 489.56 543.69 489.77 543.96C489.98 544.23 490.2 544.5 490.47 544.77C490.74 545.04 490.96 545.26 491.17 545.53C491.38 545.8 491.6 546.07 491.87 546.34C492.14 546.61 492.36 546.83 492.57 547.1C492.78 547.37 493 547.64 493.27 547.91C493.54 548.18 493.76 548.4 493.97 548.67C494.18 548.94 494.4 549.21 494.67 549.48C494.94 549.75 495.16 549.97 495.37 550.24C495.58 550.51 495.8 550.78 496.07 551.05C496.34 551.32 496.56 551.54 496.77 551.81C496.98 552.08 497.2 552.35 497.47 552.62C497.74 552.89 497.96 553.11 498.17 553.38C498.38 553.65 498.6 553.92 498.87 554.19C499.14 554.46 499.36 554.68 499.57 554.95C499.78 555.22 500 555.49 500.27 555.76C500.54 556.03 500.76 556.25 500.97 556.52C501.18 556.79 501.4 557.06 501.67 557.33C501.94 557.6 502.16 557.82 502.37 558.09C502.58 558.36 502.8 558.63 503.07 558.9C503.34 559.17 503.56 559.39 503.77 559.66C503.98 559.93 504.2 560.2 504.47 560.47C504.74 560.74 504.96 560.96 505.17 561.23C505.38 561.5 505.6 561.77 505.87 562.04C506.14 562.31 506.36 562.53 506.57 562.8C506.78 563.07 507 563.34 507.27 563.61C507.54 563.88 507.76 564.1 507.97 564.37C508.18 564.64 508.4 564.91 508.67 565.18C508.94 565.45 509.16 565.67 509.37 565.94C509.58 566.21 509.8 566.48 510.07 566.75C510.34 567.02 510.56 567.24 510.77 567.51C510.98 567.78 511.2 568.05 511.47 568.32C511.74 568.59 511.96 568.81 512.17 569.08C512.38 569.35 512.6 569.62 512.87 569.89C513.14 570.16 513.36 570.38 513.57 570.65C513.78 570.92 514 571.19 514.27 571.46C514.54 571.73 514.76 571.95 514.97 572.22C515.18 572.49 515.4 572.76 515.67 573.03C515.94 573.3 516.16 573.52 516.37 573.79C516.58 574.06 516.8 574.33 517.07 574.6C517.34 574.87 517.56 575.09 517.77 575.36C517.98 575.63 518.2 575.9 518.47 576.17C518.74 576.44 518.96 576.66 519.17 576.93C519.38 577.2 519.6 577.47 519.87 577.74C520.14 578.01 520.36 578.23 520.57 578.5C520.78 578.77 521 579.04 521.27 579.31C521.54 579.58 521.76 579.8 521.97 580.07C522.18 580.34 522.4 580.61 522.67 580.88C522.94 581.15 523.16 581.37 523.37 581.64C523.58 581.91 523.8 582.18 524.07 582.45C524.34 582.72 524.56 582.94 524.77 583.21C524.98 583.48 525.2 583.75 525.47 584.02C525.74 584.29 525.96 584.51 526.17 584.78C526.38 585.05 526.6 585.32 526.87 585.59C527.14 585.86 527.36 586.08 527.57 586.35C527.78 586.62 528 586.89 528.27 587.16C528.54 587.43 528.76 587.65 528.97 587.92C529.18 588.19 529.4 588.46 529.67 588.73C529.94 589 530.16 589.22 530.37 589.49C530.58 589.76 530.8 590.03 531.07 590.3C531.34 590.57 531.56 590.79 531.77 591.06C531.98 591.33 532.2 591.6 532.47 591.87C532.74 592.14 532.96 592.36 533.17 592.63C533.38 592.9 533.6 593.17 533.87 593.44C534.14 593.71 534.36 593.93 534.57 594.2C534.78 594.47 535 594.74 535.27 595.01C535.54 595.28 535.76 595.5 535.97 595.77C536.18 596.04 536.4 596.31 536.67 596.58C536.94 596.85 537.16 597.07 537.37 597.34C537.58 597.61 537.8 597.88 538.07 598.15C538.34 598.42 538.56 598.64 538.77 598.91C538.98 599.18 539.2 599.45 539.47 599.72C539.74 599.99 539.96 600.21 540.17 600.48C540.38 600.75 540.6 601.02 540.87 601.29C541.14 601.56 541.36 601.78 541.57 602.05C541.78 602.32 542 602.59 542.27 602.86C542.54 603.13 542.76 603.35 542.97 603.62C543.18 603.89 543.4 604.16 543.67 604.43C543.94 604.7 544.16 604.92 544.37 605.19C544.58 605.46 544.8 605.73 545.07 606C545.34 606.27 545.56 606.49 545.77 606.76C545.98 607.03 546.2 607.3 546.47 607.57C546.74 607.84 546.96 608.06 547.17 608.33C547.38 608.6 547.6 608.87 547.87 609.14C548.14 609.41 548.36 609.63 548.57 609.9C548.78 610.17 549 610.44 549.27 610.71C549.54 610.98 549.76 611.2 549.97 611.47C550.18 611.74 550.4 612.01 550.67 612.28C550.94 612.55 551.16 612.77 551.37 613.04C551.58 613.31 551.8 613.58 552.07 613.85C552.34 614.12 552.56 614.34 552.77 614.61C552.98 614.88 553.2 615.15 553.47 615.42C553.74 615.69 553.96 615.91 554.17 616.18C554.38 616.45 554.6 616.72 554.87 616.99C555.14 617.26 555.36 617.48 555.57 617.75C555.78 618.02 556 618.29 556.27 618.56C556.54 618.83 556.76 619.05 556.97 619.32C557.18 619.59 557.4 619.86 557.67 620.13C557.94 620.4 558.16 620.62 558.37 620.89C558.58 621.16 558.8 621.43 559.07 621.7C559.34 621.97 559.56 622.19 559.77 622.46C559.98 622.73 560.2 623 560.47 623.27C560.74 623.54 560.96 623.76 561.17 624.03C561.38 624.3 561.6 624.57 561.87 624.84C562.14 625.11 562.36 625.33 562.57 625.6C562.78 625.87 563 626.14 563.27 626.41C563.54 626.68 563.76 626.9 563.97 627.17C564.18 627.44 564.4 627.71 564.67 627.98C564.94 628.25 565.16 628.47 565.37 628.74C565.58 629.01 565.8 629.28 566.07 629.55C566.34 629.82 566.56 630.04 566.77 630.31C566.98 630.58 567.2 630.85 567.47 631.12C567.74 631.39 567.96 631.61 568.17 631.88C568.38 632.15 568.6 632.42 568.87 632.69C569.14 632.96 569.36 633.18 569.57 633.45C569.78 633.72 570 633.99 570.27 634.26C570.54 634.53 570.76 634.75 570.97 635.02C571.18 635.29 571.4 635.56 571.67 635.83C571.94 636.1 572.16 636.32 572.37 636.59C572.58 636.86 572.8 637.13 573.07 637.4C573.34 637.67 573.56 637.89 573.77 638.16C573.98 638.43 574.2 638.7 574.47 638.97C574.74 639.24 574.96 639.46 575.17 639.73C575.38 640 575.6 640.27 575.87 640.54C576.14 640.81 576.36 641.03 576.57 641.3C576.78 641.57 577 641.84 577.27 642.11C577.54 642.38 577.76 642.6 577.97 642.87C578.18 643.14 578.4 643.41 578.67 643.68C578.94 643.95 579.16 644.17 579.37 644.44C579.58 644.71 579.8 644.98 580.07 645.25C580.34 645.52 580.56 645.74 580.77 646.01C580.98 646.28 581.2 646.55 581.47 646.82C581.74 647.09 581.96 647.31 582.17 647.58C582.38 647.85 582.6 648.12 582.87 648.39C583.14 648.66 583.36 648.88 583.57 649.15C583.78 649.42 584 649.69 584.27 649.96C584.54 650.23 584.76 650.45 584.97 650.72C585.18 650.99 585.4 651.26 585.67 651.53C585.94 651.8 586.16 652.02 586.37 652.29C586.58 652.56 586.8 652.83 587.07 653.1C587.34 653.37 587.56 653.59 587.77 653.86C587.98 654.13 588.2 654.4 588.47 654.67C588.74 654.94 588.96 655.16 589.17 655.43C589.38 655.7 589.6 655.97 589.87 656.24C590.14 656.51 590.36 656.73 590.57 657C590.78 657.27 591 657.54 591.27 657.81C591.54 658.08 591.76 658.3 591.97 658.57C592.18 658.84 592.4 659.11 592.67 659.38C592.94 659.65 593.16 659.87 593.37 660.14C593.58 660.41 593.8 660.68 594.07 660.95C594.34 661.22 594.56 661.44 594.77 661.71C594.98 661.98 595.2 662.25 595.47 662.52C595.74 662.79 595.96 663.01 596.17 663.28C596.38 663.55 596.6 663.82 596.87 664.09C597.14 664.36 597.36 664.58 597.57 664.85C597.78 665.12 598 665.39 598.27 665.66C598.54 665.93 598.76 666.15 598.97 666.42C599.18 666.69 599.4 666.96 599.67 667.23C599.94 667.5 600.16 667.72 600.37 667.99C600.58 668.26 600.8 668.53 601.07 668.8C601.34 669.07 601.56 669.29 601.77 669.56C601.98 669.83 602.2 670.1 602.47 670.37C602.74 670.64 602.96 670.86 603.17 671.13C603.38 671.4 603.6 671.67 603.87 671.94C604.14 672.21 604.36 672.43 604.57 672.7C604.78 672.97 605 673.24 605.27 673.51C605.54 673.78 605.76 674 605.97 674.27C606.18 674.54 606.4 674.81 606.67 675.08C606.94 675.35 607.16 675.57 607.37 675.84C607.58 676.11 607.8 676.38 608.07 676.65C608.34 676.92 608.56 677.14 608.77 677.41C608.98 677.68 609.2 677.95 609.47 678.22C609.74 678.49 609.96 678.71 610.17 678.98C610.38 679.25 610.6 679.52 610.87 679.79C611.14 680.06 611.36 680.28 611.57 680.55C611.78 680.82 612 681.09 612.27 681.36C612.54 681.63 612.76 681.85 612.97 682.12C613.18 682.39 613.4 682.66 613.67 682.93C613.94 683.2 614.16 683.42 614.37 683.69C614.58 683.96 614.8 684.23 615.07 684.5C615.34 684.77 615.56 684.99 615.77 685.26C615.98 685.53 616.2 685.8 616.47 686.07C616.74 686.34 616.96 686.56 617.17 686.83C617.38 687.1 617.6 687.37 617.87 687.64C618.14 687.91 618.36 688.13 618.57 688.4C618.78 688.67 619 688.94 619.27 689.21C619.54 689.48 619.76 689.7 619.97 689.97C620.18 690.24 620.4 690.51 620.67 690.78C620.94 691.05 621.16 691.27 621.37 691.54C621.58 691.81 621.8 692.08 622.07 692.35C622.34 692.62 622.56 692.84 622.77 693.11C622.98 693.38 623.2 693.65 623.47 693.92C623.74 694.19 623.96 694.41 624.17 694.68C624.38 694.95 624.6 695.22 624.87 695.49C625.14 695.76 625.36 695.98 625.57 696.25C625.78 696.52 626 696.79 626.27 697.06C626.54 697.33 626.76 697.55 626.97 697.82C627.18 698.09 627.4 698.36 627.67 698.63C627.94 698.9 628.16 699.12 628.37 699.39C628.58 699.66 628.8 699.93 629.07 700.2C629.34 700.47 629.56 700.69 629.77 700.96C629.98 701.23 630.2 701.5 630.47 701.77C630.74 702.04 630.96 702.26 631.17 702.53C631.38 702.8 631.6 703.07 631.87 703.34C632.14 703.61 632.36 703.83 632.57 704.1C632.78 704.37 633 704.64 633.27 704.91C633.54 705.18 633.76 705.4 633.97 705.67C634.18 705.94 634.4 706.21 634.67 706.48C634.94 706.75 635.16 706.97 635.37 707.24C635.58 707.51 635.8 707.78 636.07 708.05C636.34 708.32 636.56 708.54 636.77 708.81C636.98 709.08 637.2 709.35 637.47 709.62C637.74 709.89 637.96 710.11 638.17 710.38C638.38 710.65 638.6 710.92 638.87 711.19C639.14 711.46 639.36 711.68 639.57 711.95C639.78 712.22 640 712.49 640.27 712.76C640.54 713.03 640.76 713.25 640.97 713.52C641.18 713.79 641.4 714.06 641.67 714.33C641.94 714.6 642.16 714.82 642.37 715.09C642.58 715.36 642.8 715.63 643.07 715.9C643.34 716.17 643.56 716.39 643.77 716.66C643.98 716.93 644.2 717.2 644.47 717.47C644.74 717.74 644.96 717.96 645.17 718.23C645.38 718.5 645.6 718.77 645.87 719.04C646.14 719.31 646.36 719.53 646.57 719.8C646.78 720.07 647 720.34 647.27 720.61C647.54 720.88 647.76 721.1 647.97 721.37C648.18 721.64 648.4 721.91 648.67 722.18C648.94 722.45 649.16 722.67 649.37 722.94C649.58 723.21 649.8 723.48 650.07 723.75C650.34 724.02 650.56 724.24 650.77 724.51C650.98 724.78 651.2 725.05 651.47 725.32C651.74 725.59 651.96 725.81 652.17 726.08C652.38 726.35 652.6 726.62 652.87 726.89C653.14 727.16 653.36 727.38 653.57 727.65C653.78 727.92 654 728.19 654.27 728.46C654.54 728.73 654.76 728.95 654.97 729.22C655.18 729.49 655.4 729.76 655.67 730.03C655.94 730.3 656.16 730.52 656.37 730.79C656.58 731.06 656.8 731.33 657.07 731.6C657.34 731.87 657.56 732.09 657.77 732.36C657.98 732.63 658.2 732.9 658.47 733.17C658.74 733.44 658.96 733.66 659.17 733.93C659.38 734.2 659.6 734.47 659.87 734.74C660.14 735.01 660.36 735.23 660.57 735.5C660.78 735.77 661 736.04 661.27 736.31C661.54 736.58 661.76 736.8 661.97 737.07C662.18 737.34 662.4 737.61 662.67 737.88C662.94 738.15 663.16 738.37 663.37 738.64C663.58 738.91 663.8 739.18 664.07 739.45C664.34 739.72 664.56 739.94 664.77 740.21C664.98 740.48 665.2 740.75 665.47 741.02C665.74 741.29 665.96 741.51 666.17 741.78C666.38 742.05 666.6 742.32 666.87 742.59C667.14 742.86 667.36 743.08 667.57 743.35C667.78 743.62 668 743.89 668.27 744.16C668.54 744.43 668.76 744.65 668.97 744.92C669.18 745.19 669.4 745.46 669.67 745.73C669.94 746 670.16 746.22 670.37 746.49C670.58 746.76 670.8 747.03 671.07 747.3C671.34 747.57 671.56 747.79 671.77 748.06C671.98 748.33 672.2 748.6 672.47 748.87C672.74 749.14 672.96 749.36 673.17 749.63C673.38 749.9 673.6 750.17 673.87 750.44C674.14 750.71 674.36 750.93 674.57 751.2C674.78 751.47 675 751.74 675.27 752.01C675.54 752.28 675.76 752.5 675.97 752.77C676.18 753.04 676.4 753.31 676.67 753.58C676.94 753.85 677.16 754.07 677.37 754.34C677.58 754.61 677.8 754.88 678.07 755.15C678.34 755.42 678.56 755.64 678.77 755.91C678.98 756.18 679.2 756.45 679.47 756.72C679.74 756.99 679.96 757.21 680.17 757.48C680.38 757.75 680.6 758.02 680.87 758.29C681.14 758.56 681.36 758.78 681.57 759.05C681.78 759.32 682 759.59 682.27 759.86C682.54 760.13 682.76 760.35 682.97 760.62C683.18 760.89 683.4 761.16 683.67 761.43C683.94 761.7 684.16 761.92 684.37 762.19C684.58 762.46 684.8 762.73 685.07 763C685.34 763.27 685.56 763.49 685.77 763.76C685.98 764.03 686.2 764.3 686.47 764.57C686.74 764.84 686.96 765.06 687.17 765.33C687.38 765.6 687.6 765.87 687.87 766.14C688.14 766.41 688.36 766.63 688.57 766.9C688.78 767.17 689 767.44 689.27 767.71C689.54 767.98 689.76 768.2 689.97 768.47C690.18 768.74 690.4 769.01 690.67 769.28C690.94 769.55 691.16 769.77 691.37 770.04C691.58 770.31 691.8 770.58 692.07 770.85C692.34 771.12 692.56 771.34 692.77 771.61C692.98 771.88 693.2 772.15 693.47 772.42C693.74 772.69 693.96 772.91 694.17 773.18C694.38 773.45 694.6 773.72 694.87 773.99C695.14 774.26 695.36 774.48 695.57 774.75C695.78 775.02 696 775.29 696.27 775.56C696.54 775.83 696.76 776.05 696.97 776.32C697.18 776.59 697.4 776.86 697.67 777.13C697.94 777.4 698.16 777.62 698.37 777.89C698.58 778.16 698.8 778.43 699.07 778.7C699.34 778.97 699.56 779.19 699.77 779.46C699.98 779.73 700.2 780 700.47 780.27C700.74 780.54 700.96 780.76 701.17 781.03C701.38 781.3 701.6 781.57 701.87 781.84C702.14 782.11 702.36 782.33 702.57 782.6C702.78 782.87 703 783.14 703.27 783.41C703.54 783.68 703.76 783.9 703.97 784.17C704.18 784.44 704.4 784.71 704.67 784.98C704.94 785.25 705.16 785.47 705.37 785.74C705.58 786.01 705.8 786.28 706.07 786.55C706.34 786.82 706.56 787.04 706.77 787.31C706.98 787.58 707.2 787.85 707.47 788.12C707.74 788.39 707.96 788.61 708.17 788.88C708.38 789.15 708.6 789.42 708.87 789.69C709.14 789.96 709.36 790.18 709.57 790.45C709.78 790.72 710 790.99 710.27 791.26C710.54 791.53 710.76 791.75 710.97 792.02C711.18 792.29 711.4 792.56 711.67 792.83C711.94 793.1 712.16 793.32 712.37 793.59C712.58 793.86 712.8 794.13 713.07 794.4C713.34 794.67 713.56 794.89 713.77 795.16C713.98 795.43 714.2 795.7 714.47 795.97C714.74 796.24 714.96 796.46 715.17 796.73C715.38 797 715.6 797.27 715.87 797.54C716.14 797.81 716.36 798.03 716.57 798.3C716.78 798.57 717 798.84 717.27 799.11C717.54 799.38 717.76 799.6 717.97 799.87C718.18 800.14 718.4 800.41 718.67 800.68C718.94 800.95 719.16 801.17 719.37 801.44C719.58 801.71 719.8 801.98 720.07 802.25C720.34 802.52 720.56 802.74 720.77 803.01C720.98 803.28 721.2 803.55 721.47 803.82C721.74 804.09 721.96 804.31 722.17 804.58C722.38 804.85 722.6 805.12 722.87 805.39C723.14 805.66 723.36 805.88 723.57 806.15C723.78 806.42 724 806.69 724.27 806.96C724.54 807.23 724.76 807.45 724.97 807.72C725.18 807.99 725.4 808.26 725.67 808.53C725.94 808.8 726.16 809.02 726.37 809.29C726.58 809.56 726.8 809.83 727.07 810.1C727.34 810.37 727.56 810.59 727.77 810.86C727.98 811.13 728.2 811.4 728.47 811.67C728.74 811.94 728.96 812.16 729.17 812.43C729.38 812.7 729.6 812.97 729.87 813.24C730.14 813.51 730.36 813.73 730.57 814C730.78 814.27 731 814.54 731.27 814.81C731.54 815.08 731.76 815.3 731.97 815.57C732.18 815.84 732.4 816.11 732.67 816.38C732.94 816.65 733.16 816.87 733.37 817.14C733.58 817.41 733.8 817.68 734.07 817.95C734.34 818.22 734.56 818.44 734.77 818.71C734.98 818.98 735.2 819.25 735.47 819.52C735.74 819.79 735.96 820.01 736.17 820.28C736.38 820.55 736.6 820.82 736.87 821.09C737.14 821.36 737.36 821.58 737.57 821.85C737.78 822.12 738 822.39 738.27 822.66C738.54 822.93 738.76 823.15 738.97 823.42C739.18 823.69 739.4 823.96 739.67 824.23C739.94 824.5 740.16 824.72 740.37 824.99C740.58 825.26 740.8 825.53 741.07 825.8C741.34 826.07 741.56 826.29 741.77 826.56C741.98 826.83 742.2 827.1 742.47 827.37C742.74 827.64 742.96 827.86 743.17 828.13C743.38 828.4 743.6 828.67 743.87 828.94C744.14 829.21 744.36 829.43 744.57 829.7C744.78 829.97 745 830.24 745.27 830.51C745.54 830.78 745.76 831 745.97 831.27C746.18 831.54 746.4 831.81 746.67 832.08C746.94 832.35 747.16 832.57 747.37 832.84C747.58 833.11 747.8 833.38 748.07 833.65C748.34 833.92 748.56 834.14 748.77 834.41C748.98 834.68 749.2 834.95 749.47 835.22C749.74 835.49 749.96 835.71 750.17 835.98C750.38 836.25 750.6 836.52 750.87 836.79C751.14 837.06 751.36 837.28 751.57 837.55C751.78 837.82 752 838.09 752.27 838.36C752.54 838.63 752.76 838.85 752.97 839.12C753.18 839.39 753.4 839.66 753.67 839.93C753.94 840.2 754.16 840.42 754.37 840.69C754.58 840.96 754.8 841.23 755.07 841.5C755.34 841.77 755.56 841.99 755.77 842.26C755.98 842.53 756.2 842.8 756.47 843.07C756.74 843.34 756.96 843.56 757.17 843.83C757.38 844.1 757.6 844.37 757.87 844.64C758.14 844.91 758.36 845.13 758.57 845.4C758.78 845.67 759 845.94 759.27 846.21C759.54 846.48 759.76 846.7 759.97 846.97C760.18 847.24 760.4 847.51 760.67 847.78C760.94 848.05 761.16 848.27 761.37 848.54C761.58 848.81 761.8 849.08 762.07 849.35C762.34 849.62 762.56 849.84 762.77 850.11C762.98 850.38 763.2 850.65 763.47 850.92C763.74 851.19 763.96 851.41 764.17 851.68C764.38 851.95 764.6 852.22 764.87 852.49C765.14 852.76 765.36 852.98 765.57 853.25C765.78 853.52 766 853.79 766.27 854.06C766.54 854.33 766.76 854.55 766.97 854.82C767.18 855.09 767.4 855.36 767.67 855.63C767.94 855.9 768.16 856.12 768.37 856.39C768.58 856.66 768.8 856.93 769.07 857.2C769.34 857.47 769.56 857.69 769.77 857.96C769.98 858.23 770.2 858.5 770.47 858.77C770.74 859.04 770.96 859.26 771.17 859.53C771.38 859.8 771.6 860.07 771.87 860.34C772.14 860.61 772.36 860.83 772.57 861.1C772.78 861.37 773 861.64 773.27 861.91C773.54 862.18 773.76 862.4 773.97 862.67C774.18 862.94 774.4 863.21 774.67 863.48C774.94 863.75 775.16 863.97 775.37 864.24C775.58 864.51 775.8 864.78 776.07 865.05C776.34 865.32 776.56 865.54 776.77 865.81C776.98 866.08 777.2 866.35 777.47 866.62C777.74 866.89 777.96 867.11 778.17 867.38C778.38 867.65 778.6 867.92 778.87 868.19C779.14 868.46 779.36 868.68 779.57 868.95C779.78 869.22 780 869.49 780.27 869.76C780.54 870.03 780.76 870.25 780.97 870.52C781.18 870.79 781.4 871.06 781.67 871.33C781.94 871.6 782.16 871.82 782.37 872.09C782.58 872.36 782.8 872.63 783.07 872.9C783.34 873.17 783.56 873.39 783.77 873.66C783.98 873.93 784.2 874.2 784.47 874.47C784.74 874.74 784.96 874.96 785.17 875.23C785.38 875.5 785.6 875.77 785.87 876.04C786.14 876.31 786.36 876.53 786.57 876.8C786.78 877.07 787 877.34 787.27 877.61C787.54 877.88 787.76 878.1 787.97 878.37C788.18 878.64 788.4 878.91 788.67 879.18C788.94 879.45 789.16 879.67 789.37 879.94C789.58 880.21 789.8 880.48 790.07 880.75C790.34 881.02 790.56 881.24 790.77 881.51C790.98 881.78 791.2 882.05 791.47 882.32C791.74 882.59 791.96 882.81 792.17 883.08C792.38 883.35 792.6 883.62 792.87 883.89C793.14 884.16 793.36 884.38 793.57 884.65C793.78 884.92 794 885.19 794.27 885.46C794.54 885.73 794.76 885.95 794.97 886.22C795.18 886.49 795.4 886.76 795.67 887.03C795.94 887.3 796.16 887.52 796.37 887.79C796.58 888.06 796.8 888.33 797.07 888.6C797.34 888.87 797.56 889.09 797.77 889.36C797.98 889.63 798.2 889.9 798.47 890.17C798.74 890.44 798.96 890.66 799.17 890.93C799.38 891.2 799.6 891.47 799.87 891.74C800.14 892.01 800.36 892.23 800.57 892.5C800.78 892.77 801 893.04 801.27 893.31C801.54 893.58 801.76 893.8 801.97 894.07C802.18 894.34 802.4 894.61 802.67 894.88C802.94 895.15 803.16 895.37 803.37 895.64C803.58 895.91 803.8 896.18 804.07 896.45C804.34 896.72 804.56 896.94 804.77 897.21C804.98 897.48 805.2 897.75 805.47 898.02C805.74 898.29 805.96 898.51 806.17 898.78C806.38 899.05 806.6 899.32 806.87 899.59C807.14 899.86 807.36 900.08 807.57 900.35C807.78 900.62 808 900.89 808.27 901.16C808.54 901.43 808.76 901.65 808.97 901.92C809.18 902.19 809.4 902.46 809.67 902.73C809.94 903 810.16 903.22 810.37 903.49C810.58 903.76 810.8 904.03 811.07 904.3C811.34 904.57 811.56 904.79 811.77 905.06C811.98 905.33 812.2 905.6 812.47 905.87C812.74 906.14 812.96 906.36 813.17 906.63C813.38 906.9 813.6 907.17 813.87 907.44C814.14 907.71 814.36 907.93 814.57 908.2C814.78 908.47 815 908.74 815.27 909.01C815.54 909.28 815.76 909.5 815.97 909.77C816.18 910.04 816.4 910.31 816.67 910.58C816.94 910.85 817.16 911.07 817.37 911.34C817.58 911.61 817.8 911.88 818.07 912.15C818.34 912.42 818.56 912.64 818.77 912.91C818.98 913.18 819.2 913.45 819.47 913.72C819.74 913.99 819.96 914.21 820.17 914.48C820.38 914.75 820.6 915.02 820.87 915.29C821.14 915.56 821.36 915.78 821.57 916.05C821.78 916.32 822 916.59 822.27 916.86C822.54 917.13 822.76 917.35 822.97 917.62C823.18 917.89 823.4 918.16 823.67 918.43C823.94 918.7 824.16 918.92 824.37 919.19C824.58 919.46 824.8 919.73 825.07 920C825.34 920.27 825.56 920.49 825.77 920.76C825.98 921.03 826.2 921.3 826.47 921.57C826.74 921.84 826.96 922.06 827.17 922.33C827.38 922.6 827.6 922.87 827.87 923.14C828.14 923.41 828.36 923.63 828.57 923.9C828.78 924.17 829 924.44 829.27 924.71C829.54 924.98 829.76 925.2 829.97 925.47C830.18 925.74 830.4 926.01 830.67 926.28C830.94 926.55 831.16 926.77 831.37 927.04C831.58 927.31 831.8 927.58 832.07 927.85C832.34 928.12 832.56 928.34 832.77 928.61C832.98 928.88 833.2 929.15 833.47 929.42C833.74 929.69 833.96 929.91 834.17 930.18C834.38 930.45 834.6 930.72 834.87 930.99C835.14 931.26 835.36 931.48 835.57 931.75C835.78 932.02 836 932.29 836.27 932.56C836.54 932.83 836.76 933.05 836.97 933.32C837.18 933.59 837.4 933.86 837.67 934.13C837.94 934.4 838.16 934.62 838.37 934.89C838.58 935.16 838.8 935.43 839.07 935.7C839.34 935.97 839.56 936.19 839.77 936.46C839.98 936.73 840.2 937 840.47 937.27C840.74 937.54 840.96 937.76 841.17 938.03C841.38 938.3 841.6 938.57 841.87 938.84C842.14 939.11 842.36 939.33 842.57 939.6C842.78 939.87 843 940.14 843.27 940.41C843.54 940.68 843.76 940.9 843.97 941.17C844.18 941.44 844.4 941.71 844.67 941.98C844.94 942.25 845.16 942.47 845.37 942.74C845.58 943.01 845.8 943.28 846.07 943.55C846.34 943.82 846.56 944.04 846.77 944.31C846.98 944.58 847.2 944.85 847.47 945.12C847.74 945.39 847.96 945.61 848.17 945.88C848.38 946.15 848.6 946.42 848.87 946.69C849.14 946.96 849.36 947.18 849.57 947.45C849.78 947.72 850 947.99 850.27 948.26C850.54 948.53 850.76 948.75 850.97 949.02C851.18 949.29 851.4 949.56 851.67 949.83C851.94 950.1 852.16 950.32 852.37 950.59C852.58 950.86 852.8 951.13 853.07 951.4C853.34 951.67 853.56 951.89 853.77 952.16C853.98 952.43 854.2 952.7 854.47 952.97C854.74 953.24 854.96 953.46 855.17 953.73C855.38 954 855.6 954.27 855.87 954.54C856.14 954.81 856.36 955.03 856.57 955.3C856.78 955.57 857 955.84 857.27 956.11C857.54 956.38 857.76 956.6 857.97 956.87C858.18 957.14 858.4 957.41 858.67 957.68C858.94 957.95 859.16 958.17 859.37 958.44C859.58 958.71 859.8 958.98 860.07 959.25C860.34 959.52 860.56 959.74 860.77 960.01C860.98 960.28 861.2 960.55 861.47 960.82C861.74 961.09 861.96 961.31 862.17 961.58C862.38 961.85 862.6 962.12 862.87 962.39C863.14 962.66 863.36 962.88 863.57 963.15C863.78 963.42 864 963.69 864.27 963.96C864.54 964.23 864.76 964.45 864.97 964.72C865.18 964.99 865.4 965.26 865.67 965.53C865.94 965.8 866.16 966.02 866.37 966.29C866.58 966.56 866.8 966.83 867.07 967.1C867.34 967.37 867.56 967.59 867.77 967.86C867.98 968.13 868.2 968.4 868.47 968.67C868.74 968.94 868.96 969.16 869.17 969.43C869.38 969.7 869.6 969.97 869.87 970.24C870.14 970.51 870.36 970.73 870.57 971C870.78 971.27 871 971.54 871.27 971.81C871.54 972.08 871.76 972.3 871.97 972.57C872.18 972.84 872.4 973.11 872.67 973.38C872.94 973.65 873.16 973.87 873.37 974.14C873.58 974.41 873.8 974.68 874.07 974.95C874.34 975.22 874.56 975.44 874.77 975.71C874.98 975.98 875.2 976.25 875.47 976.52C875.74 976.79 875.96 977.01 876.17 977.28C876.38 977.55 876.6 977.82 876.87 978.09C877.14 978.36 877.36 978.58 877.57 978.85C877.78 979.12 878 979.39 878.27 979.66C878.54 979.93 878.76 980.15 878.97 980.42C879.18 980.69 879.4 980.96 879.67 981.23C879.94 981.5 880.16 981.72 880.37 981.99C880.58 982.26 880.8 982.53 881.07 982.8C881.34 983.07 881.56 983.29 881.77 983.56C881.98 983.83 882.2 984.1 882.47 984.37C882.74 984.64 882.96 984.86 883.17 985.13C883.38 985.4 883.6 885.67 883.87 885.94C884.14 886.21 884.36 886.43 884.57 886.7C884.78 886.97 885 887.24 885.27 887.51C885.54 887.78 885.76 888 885.97 888.27C886.18 888.54 886.4 888.81 886.67 889.08C886.94 889.35 887.16 889.57 887.37 889.84C887.58 890.11 887.8 890.38 888.07 890.65C888.34 890.92 888.56 891.14 888.77 891.41C888.98 891.68 889.2 891.95 889.47 892.22C889.74 892.49 889.96 892.71 890.17 892.98C890.38 893.25 890.6 893.52 890.87 893.79C891.14 894.06 891.36 894.28 891.57 894.55C891.78 894.82 892 895.09 892.27 895.36C892.54 895.63 892.76 895.85 892.97 896.12C893.18 896.39 893.4 896.66 893.67 896.93C893.94 897.2 894.16 897.42 894.37 897.69C894.58 897.96 894.8 898.23 895.07 898.5C895.34 898.77 895.56 898.99 895.77 899.26C895.98 899.53 896.2 899.8 896.47 900.07C896.74 900.34 896.96 900.56 897.17 900.83C897.38 901.1 897.6 901.37 897.87 901.64C898.14 901.91 898.36 902.13 898.57 902.4C898.78 902.67 899 902.94 899.27 903.21C899.54 903.48 899.76 903.7 899.97 903.97C900.18 904.24 900.4 904.51 900.67 904.78C900.94 905.05 901.16 905.27 901.37 905.54C901.58 905.81 901.8 906.08 902.07 906.35C902.34 906.62 902.56 906.84 902.77 907.11C902.98 907.38 903.2 907.65 903.47 907.92C903.74 908.19 903.96 908.41 904.17 908.68C904.38 908.95 904.6 909.22 904.87 909.49C905.14 909.76 905.36 909.98 905.57 910.25C905.78 910.52 906 910.79 906.27 911.06C906.54 911.33 906.76 911.55 906.97 911.82C907.18 912.09 907.4 912.36 907.67 912.63C907.94 912.9 908.16 913.12 908.37 913.39C908.58 913.66 908.8 913.93 909.07 914.2C909.34 914.47 909.56 914.69 909.77 914.96C909.98 915.23 910.2 915.5 910.47 915.77C910.74 916.04 910.96 916.26 911.17 916.53C911.38 916.8 911.6 917.07 911.87 917.34C912.14 917.61 912.36 917.83 912.57 918.1C912.78 918.37 913 918.64 913.27 918.91C913.54 919.18 913.76 919.4 913.97 919.67C914.18 919.94 914.4 920.21 914.67 920.48C914.94 920.75 915.16 920.97 915.37 921.24C915.58 921.51 915.8 921.78 916.07 922.05C916.34 922.32 916.56 922.54 916.77 922.81C916.98 923.08 917.2 923.35 917.47 923.62C917.74 923.89 917.96 924.11 918.17 924.38C918.38 924.65 918.6 924.92 918.87 925.19C919.14 925.46 919.36 925.68 919.57 925.95C919.78 926.22 920 926.49 920.27 926.76C920.54 927.03 920.76 927.25 920.97 927.52C921.18 927.79 921.4 928.06 921.67 928.33C921.94 928.6 922.16 928.82 922.37 929.09C922.58 929.36 922.8 929.63 923.07 929.9C923.34 930.17 923.56 930.39 923.77 930.66C923.98 930.93 924.2 931.2 924.47 931.47C924.74 931.74 924.96 931.96 925.17 932.23C925.38 932.5 925.6 932.77 925.87 933.04C926.14 933.31 926.36 933.53 926.57 933.8C926.78 934.07 927 934.34 927.27 934.61C927.54 934.88 927.76 935.1 927.97 935.37C928.18 935.64 928.4 935.91 928.67 936.18C928.94 936.45 929.16 936.67 929.37 936.94C929.58 937.21 929.8 937.48 930.07 937.75C930.34 938.02 930.56 938.24 930.77 938.51C930.98 938.78 931.2 939.05 931.47 939.32C931.74 939.59 931.96 939.81 932.17 940.08C932.38 940.35 932.6 940.62 932.87 940.89C933.14 941.16 933.36 941.38 933.57 941.65C933.78 941.92 934 942.19 934.27 942.46C934.54 942.73 934.76 942.95 934.97 943.22C935.18 943.49 935.4 943.76 935.67 944.03C935.94 944.3 936.16 944.52 936.37 944.79C936.58 945.06 936.8 945.33 937.07 945.6C937.34 945.87 937.56 946.09 937.77 946.36C937.98 946.63 938.2 946.9 938.47 947.17C938.74 947.44 938.96 947.66 939.17 947.93C939.38 948.2 939.6 948.47 939.87 948.74C940.14 949.01 940.36 949.23 940.57 949.5C940.78 949.77 941 950.04 941.27 950.31C941.54 950.58 941.76 950.8 941.97 951.07C942.18 951.34 942.4 951.61 942.67 951.88C942.94 952.15 943.16 952.37 943.37 952.64C943.58 952.91 943.8 953.18 944.07 953.45C944.34 953.72 944.56 953.94 944.77 954.21C944.98 954.48 945.2 954.75 945.47 955.02C945.74 955.29 945.96 955.51 946.17 955.78C946.38 956.05 946.6 956.32 946.87 956.59C947.14 956.86 947.36 957.08 947.57 957.35C947.78 957.62 948 957.89 948.27 958.16C948.54 958.43 948.76 958.65 948.97 958.92C949.18 959.19 949.4 959.46 949.67 959.73C949.94 960 950.16 960.22 950.37 960.49C950.58 960.76 950.8 961.03 951.07 961.3C951.34 961.57 951.56 961.79 951.77 962.06C951.98 962.33 952.2 962.6 952.47 962.87C952.74 963.14 952.96 963.36 953.17 963.63C953.38 963.9 953.6 964.17 953.87 964.44C954.14 964.71 954.36 964.93 954.57 965.2C954.78 965.47 955 965.74 955.27 966.01C955.54 966.28 955.76 966.5 955.97 966.77C956.18 967.04 956.4 967.31 956.67 967.58C956.94 967.85 957.16 968.07 957.37 968.34C957.58 968.61 957.8 968.88 958.07 969.15C958.34 969.42 958.56 969.64 958.77 969.91C958.98 970.18 959.2 970.45 959.47 970.72C959.74 970.99 959.96 971.21 960.17 971.48C960.38 971.75 960.6 972.02 960.87 972.29C961.14 972.56 961.36 972.78 961.57 973.05C961.78 973.32 962 973.59 962.27 973.86C962.54 974.13 962.76 974.35 962.97 974.62C963.18 974.89 963.4 975.16 963.67 975.43C963.94 975.7 964.16 975.92 964.37 976.19C964.58 976.46 964.8 976.73 965.07 977C965.34 977.27 965.56 977.49 965.77 977.76C965.98 978.03 966.2 978.3 966.47 978.57C966.74 978.84 966.96 979.06 967.17 979.33C967.38 979.6 967.6 979.87 967.87 980.14C968.14 980.41 968.36 980.63 968.57 980.9C968.78 981.17 969 981.44 969.27 981.71C969.54 981.98 969.76 982.2 969.97 982.47C970.18 982.74 970.4 983.01 970.67 983.28C970.94 983.55 971.16 983.77 971.37 984.04C971.58 984.31 971.8 984.58 972.07 984.85C972.34 985.12 972.56 985.34 972.77 985.61C972.98 985.88 973.2 986.15 973.47 986.42C973.74 986.69 973.96 986.91 974.17 987.18C974.38 987.45 974.6 987.72 974.87 987.99C975.14 988.26 975.36 988.48 975.57 988.75C975.78 989.02 976 989.29 976.27 989.56C976.54 989.83 976.76 990.05 976.97 990.32C977.18 990.59 977.4 990.86 977.67 991.13C977.94 991.4 978.16 991.62 978.37 991.89C978.58 992.16 978.8 992.43 979.07 992.7C979.34 992.97 979.56 993.19 979.77 993.46C979.98 993.73 980.2 994 980.47 994.27C980.74 994.54 980.96 994.76 981.17 995.03C981.38 995.3 981.6 995.57 981.87 995.84C982.14 996.11 982.36 996.33 982.57 996.6C982.78 996.87 983 997.14 983.27 997.41C983.54 997.68 983.76 997.9 983.97 998.17C984.18 998.44 984.4 998.71 984.67 998.98C984.94 999.25 985.16 999.47 985.37 999.74C985.58 1000.01 985.8 1000.28 986.07 1000.55C986.34 1000.82 986.56 1001.04 986.77 1001.31C986.98 1001.58 987.2 1001.85 987.47 1002.12C987.74 1002.39 987.96 1002.61 988.17 1002.88C988.38 1003.15 988.6 1003.42 988.87 1003.69C989.14 1003.96 989.36 1004.18 989.57 1004.45C989.78 1004.72 990 1004.99 990.27 1005.26C990.54 1005.53 990.76 1005.75 990.97 1006.02C991.18 1006.29 991.4 1006.56 991.67 1006.83C991.94 1007.1 992.16 1007.32 992.37 1007.59C992.58 1007.86 992.8 1008.13 993.07 1008.4C993.34 1008.67 993.56 1008.89 993.77 1009.16C993.98 1009.43 994.2 1009.7 994.47 1009.97C994.74 1010.24 994.96 1010.46 995.17 1010.73C995.38 1011 995.6 1011.27 995.87 1011.54C996.14 1011.81 996.36 1012.03 996.57 1012.3C996.78 1012.57 997 1012.84 997.27 1013.11C997.54 1013.38 997.76 1013.6 997.97 1013.87C998.18 1014.14 998.4 1014.41 998.67 1014.68C998.94 1014.95 999.16 1015.17 999.37 1015.44C999.58 1015.71 999.8 1015.98 1000.07 1016.25C1000.34 1016.52 1000.56 1016.74 1000.77 1017.01C1000.98 1017.28 1001.2 1017.55 1001.47 1017.82C1001.74 1018.09 1001.96 1018.31 1002.17 1018.58C1002.38 1018.85 1002.6 1019.12 1002.87 1019.39C1003.14 1019.66 1003.36 1019.88 1003.57 1020.15C1003.78 1020.42 1004 1020.69 1004.27 1020.96C1004.54 1021.23 1004.76 1021.45 1004.97 1021.72C1005.18 1021.99 1005.4 1022.26 1005.67 1022.53C1005.94 1022.8 1006.16 1023.02 1006.37 1023.29C1006.58 1023.56 1006.8 1023.83 1007.07 1024.1C1007.34 1024.37 1007.56 1024.59 1007.77 1024.86C1007.98 1025.13 1008.2 1025.4 1008.47 1025.67C1008.74 1025.94 1008.96 1026.16 1009.17 1026.43C1009.38 1026.7 1009.6 1026.97 1009.87 1027.24C1010.14 1027.51 1010.36 1027.73 1010.57 1028C1010.78 1028.27 1011 1028.54 1011.27 1028.81C1011.54 1029.08 1011.76 1029.3 1011.97 1029.57C1012.18 1029.84 1012.4 1030.11 1012.67 1030.38C1012.94 1030.65 1013.16 1030.87 1013.37 1031.14C1013.58 1031.41 1013.8 1031.68 1014.07 1031.95C1014.34 1032.22 1014.56 1032.44 1014.77 1032.71C1014.98 1032.98 1015.2 1033.25 1015.47 1033.52C1015.74 1033.79 1015.96 1034.01 1016.17 1034.28C1016.38 1034.55 1016.6 1034.82 1016.87 1035.09C1017.14 1035.36 1017.36 1035.58 1017.57 1035.85C1017.78 1036.12 1018 1036.39 1018.27 1036.66C1018.54 1036.93 1018.76 1037.15 1018.97 1037.42C1019.18 1037.69 1019.4 1037.96 1019.67 1038.23C1019.94 1038.5 1020.16 1038.72 1020.37 1038.99C1020.58 1039.26 1020.8 1039.53 1021.07 1039.8C1021.34 1040.07 1021.56 1040.29 1021.77 1040.56C1021.98 1040.83 1022.2 1041.1 1022.47 1041.37C1022.74 1041.64 1022.96 1041.86 1023.17 1042.13C1023.38 1042.4 1023.6 1042.67 1023.87 1042.94C1024.14 1043.21 1024.36 1043.43 1024.57 1043.7C1024.78 1043.97 1025 1044.24 1025.27 1044.51C1025.54 1044.78 1025.76 1045 1025.97 1045.27C1026.18 1045.54 1026.4 1045.81 1026.67 1046.08C1026.94 1046.35 1027.16 1046.57 1027.37 1046.84C1027.58 1047.11 1027.8 1047.38 1028.07 1047.65C1028.34 1047.92 1028.56 1048.14 1028.77 1048.41C1028.98 1048.68 1029.2 1048.95 1029.47 1149.22C1029.74 1149.49 1029.96 1149.71 1030.17 1149.98C1030.38 1150.25 1030.6 1150.52 1030.87 1150.79C1031.14 1151.06 1031.36 1151.28 1031.57 1151.55C1031.78 1151.82 1032 1152.09 1032.27 1152.36C1032.54 1152.63 1032.76 1152.85 1032.97 1153.12C1033.18 1153.39 1033.4 
+    </script>
+</body>
+</html>
