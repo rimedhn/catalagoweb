@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Productos</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #catalogo { display: flex; flex-wrap: wrap; gap: 20px; }
+        .producto {
+            border: 1px solid #ccc; border-radius: 5px;
+            padding: 10px; width: 220px; box-sizing: border-box;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .producto img { max-width: 200px; max-height: 150px; margin-bottom: 10px; }
+        .producto .precio { font-weight: bold; color: #0d6efd; }
+    </style>
+</head>
+<body>
+    <h1>Catálogo de Productos</h1>
+    <label for="filtro-categoria">Filtrar por categoría: </label>
+    <select id="filtro-categoria">
+        <option value="">Todas</option>
+    </select>
+    <div id="catalogo"></div>
+
+    <!-- Tabletop.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.4/tabletop.min.js"></script>
+    <script>
+        // Reemplaza esta URL por la de tu hoja de Google Sheets publicada
+        const publicSpreadsheetURL = 'https://docs.google.com/spreadsheets/d/1ejemplo1234567890/pubhtml';
+
+        let productos = [];
+
+        function mostrarCatalogo(categoria = '') {
+            const contenedor = document.getElementById("catalogo");
+            contenedor.innerHTML = "";
+            let filtrados = productos.filter(p => p.estado.toLowerCase() === "activo");
+            if (categoria) filtrados = filtrados.filter(p => p.categoria === categoria);
+
+            if (filtrados.length === 0) {
+                contenedor.innerHTML = "<p>No hay productos para esta categoría.</p>";
+                return;
+            }
+
+            filtrados.forEach(p => {
+                const div = document.createElement("div");
+                div.className = "producto";
+                div.innerHTML = `
+                    <img src="${p.imagen}" alt="${p.descripcion}" />
+                    <div><strong>${p.codigo}</strong> - ${p.sku}</div>
+                    <div>${p.descripcion}</div>
+                    <div class="precio">$${p.precio}</div>
+                    <div><em>${p.categoria}</em></div>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        function cargarCategorias() {
+            const select = document.getElementById("filtro-categoria");
+            const categorias = Array.from(new Set(productos
+                .filter(p => p.estado.toLowerCase() === "activo")
+                .map(p => p.categoria))).sort();
+            categorias.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        window.onload = function() {
+            Tabletop.init({
+                key: publicSpreadsheetURL,
+                simpleSheet: true,
+                callback: function(data) {
+                    productos = data;
+                    cargarCategorias();
+                    mostrarCatalogo();
+
+                    document.getElementById("filtro-categoria").addEventListener("change", function() {
+                        mostrarCatalogo(this.value);
+                    });
+                }
+            });
+        };
+    </script>
+</body>
+</html>
