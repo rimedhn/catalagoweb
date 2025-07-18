@@ -532,12 +532,12 @@
       // Esperado: id,nombre,descripcion,imagen,precio,categoria,estado
       productos = prods.map(p => ({
         ID: p.id || p.ID || p.Id || slug(p.nombre) + Math.random().toString(36).slice(2,7),
-        Nombre Producto: p.nombre || p.Nombre || '',
-        Descripción: p.descripcion || p.Descripcion || '',
-        Imagen URL: p.imagen || p.Imagen || '',
-        Precio: Number(p.precio || p.Precio || 0),
-        Categoría: p.categoria || p.Categoria || 'Sin categoría',
-        Estado: (p.estado || p.Estado || '').toLowerCase().trim() === 'activo'
+        nombre: p.nombre || p.Nombre || '',
+        descripcion: p.descripcion || p.Descripcion || '',
+        imagen: p.imagen || p.Imagen || '',
+        precio: Number(p.precio || p.Precio || 0),
+        categoria: p.categoria || p.Categoria || 'Sin categoría',
+        estado: (p.estado || p.Estado || '').toLowerCase().trim() === 'activo'
       })).filter(p=>p.estado);
 
       // Categorías únicas
