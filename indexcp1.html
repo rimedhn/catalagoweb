@@ -531,11 +531,11 @@
 
       // Esperado: id,nombre,descripcion,imagen,precio,categoria,estado
       productos = prods.map(p => ({
-        id: p.id || p.ID || p.Id || slug(p.nombre) + Math.random().toString(36).slice(2,7),
-        nombre: p.nombre || p.Nombre || '',
-        descripcion: p.descripcion || p.Descripcion || '',
+        id: p.id || p.ID || p.ID || slug(p.nombre) + Math.random().toString(36).slice(2,7),
+        nombre: p.nombre || p.Nombre Producto || '',
+        descripcion: p.descripcion || p.Descripción || '',
         precio: Number(p.precio || p.Precio || 0),
-        categoria: p.categoria || p.Categoria || 'Sin categoría',
+        categoria: p.categoria || p.Categoría || 'Sin categoría',
         imagen: p.imagen || p.Imagen || '',
         estado: (p.estado || p.Estado || '').toLowerCase().trim() === 'activo'
       })).filter(p=>p.estado);
