@@ -390,7 +390,7 @@
                 <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-cover rounded-md mb-4" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e0e0e0/555555?text=Imagen+no+disponible';">
                 <h3 class="text-xl font-bold text-gray-800 mb-2 flex-grow">${product.name}</h3>
                 <p class="text-gray-600 text-sm mb-3 line-clamp-3">${product.description}</p>
-                <div class="text-2xl font-extrabold text-green-600 mb-4">$${product.price.toFixed(2)}</div>
+                <div class="text-2xl font-extrabold text-green-600 mb-4">L${product.price.toFixed(2)}</div>
                 <button data-product-id="${product.id}" class="mt-auto w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all duration-200 add-to-cart-btn">
                     Agregar al Carrito
                 </button>
@@ -453,7 +453,7 @@
                             <button data-product-id="${item.id}" data-action="increase" class="quantity-btn p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                             </button>
-                            <span class="font-bold text-gray-800 ml-4">$${(item.price * item.quantity).toFixed(2)}</span>
+                            <span class="font-bold text-gray-800 ml-4">L${(item.price * item.quantity).toFixed(2)}</span>
                             <button data-product-id="${item.id}" class="remove-item-btn text-red-500 hover:text-red-700 focus:outline-none ml-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
@@ -492,7 +492,7 @@
                 });
                 viewCartFloatingButton.classList.remove('hidden'); // Mostrar botón si hay productos
             }
-            cartTotalDiv.textContent = `Total: $${total.toFixed(2)}`;
+            cartTotalDiv.textContent = `Total: L${total.toFixed(2)}`;
             updateFloatingCartButton(); // Actualizar el contador del botón flotante
         }
 
@@ -579,11 +579,11 @@
 
             let total = 0;
             cart.forEach(item => {
-                orderDetails += `- ${item.name} (x${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}\n`;
+                orderDetails += `- ${item.name} (x${item.quantity}) - L${(item.price * item.quantity).toFixed(2)}\n`;
                 total += item.price * item.quantity;
             });
 
-            orderDetails += `\n*Total a pagar: $${total.toFixed(2)}*`;
+            orderDetails += `\n*Total a pagar: L${total.toFixed(2)}*`;
             orderDetails += `\n\n¡Gracias!`;
 
             const encodedMessage = encodeURIComponent(orderDetails);
