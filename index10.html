@@ -436,12 +436,11 @@
     const quantityInput = productCard.querySelector(`.quantity-card-input[data-product-id="${productId}"]`);
     const quantity = parseInt(quantityInput.value);
     addProductToCart(productId, quantity);
-});
-         
+});         
         }
 
 
-          // Añadir listeners para los botones de cantidad en la tarjeta
+// Añadir listeners para los botones de cantidad en la tarjeta
 productCard.querySelectorAll('.quantity-card-btn').forEach(button => {
     button.addEventListener('click', (event) => {
         const productId = event.currentTarget.getAttribute('data-product-id');
@@ -463,25 +462,7 @@ productCard.querySelector('.quantity-card-input').addEventListener('wheel', (eve
     event.preventDefault();
 });
         
-        /**
-         * Añade un producto al carrito o incrementa su cantidad si ya existe.
-         */
-        function addProductToCart(productId) {
-            const product = allProducts.find(p => p.id == productId); // Usar '==' para comparación flexible de ID
-            if (product) {
-                const existingItem = cart.find(item => item.id == productId);
-                if (existingItem) {
-                    existingItem.quantity++;
-                } else {
-                    cart.push({ ...product, quantity: 1 });
-                }
-                renderCart();
-                updateFloatingCartButton(); // Actualizar el estado del botón flotante
-                showCustomAlert(`${product.name} ha sido agregado al carrito.`);
-            } else {
-                showCustomAlert('Error: Producto no encontrado.');
-            }
-        }
+
 
         /**
          * Renderiza los productos en el carrito y actualiza el total.
