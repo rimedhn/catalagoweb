@@ -481,7 +481,7 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
         }
         renderCart();
         updateFloatingCartButton(); // Actualizar el estado del botón flotante
-        showCustomAlert(`${product.name} ha sido agregado al carrito.`);
+        showCustomAlert(`${product.id} - ${product.description} ha sido agregado al carrito.`);
     } else {
         showCustomAlert('Error: Producto no encontrado.');
     }
