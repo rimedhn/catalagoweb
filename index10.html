@@ -506,12 +506,12 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
                 headerRow.style.display = 'grid'; // <-- Usamos display grid
                 // Definimos las columnas:
                 // 1fr para el producto (flexible), y anchos fijos para cantidad, p. unitario, subtotal y botón de eliminar
-                headerRow.style.gridTemplateColumns = '35% 15% 18% 22% 10%'; // <-- ¡AJUSTA ESTOS VALORES SI ES NECESARIO!
+                headerRow.style.gridTemplateColumns = '40% 20% 15% 20% 5%'; // <-- ¡AJUSTA ESTOS VALORES SI ES NECESARIO!
                 headerRow.innerHTML = `
                     <div class="text-left">Producto</div>
                     <div class="text-center">Cant.</div>
-                    <div class="text-right">P. Unit.</div>
-                    <div class="text-right">Subtotal</div>
+                    <div class="text-center">P. Unit.</div>
+                    <div class="text-center">Subtotal</div>
                     <div class="text-center"></div> 
                 `;
                 cartItemsUl.appendChild(headerRow);
@@ -529,7 +529,7 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
                 
                 listItem.style.display = 'grid'; // <-- Usamos display grid aquí también
                 // Las columnas deben coincidir EXACTAMENTE con las de los encabezados
-                listItem.style.gridTemplateColumns = '35% 15% 18% 22% 10%'; // <-- ¡MISMOS VALORES QUE ARRIBA!
+                listItem.style.gridTemplateColumns = '40% 20% 15% 20% 5%%'; // <-- ¡MISMOS VALORES QUE ARRIBA!
                 listItem.innerHTML = `
                     <div class="text-left">
                         <span class="font-semibold">${item.name}</span>
