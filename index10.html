@@ -437,6 +437,9 @@
     const quantity = parseInt(quantityInput.value);
     addProductToCart(productId, quantity);
 });
+         
+        }
+
 
           // Añadir listeners para los botones de cantidad en la tarjeta
 productCard.querySelectorAll('.quantity-card-btn').forEach(button => {
@@ -459,9 +462,7 @@ productCard.querySelectorAll('.quantity-card-btn').forEach(button => {
 productCard.querySelector('.quantity-card-input').addEventListener('wheel', (event) => {
     event.preventDefault();
 });
-          
-        }
-
+        
         /**
          * Añade un producto al carrito o incrementa su cantidad si ya existe.
          */
