@@ -506,11 +506,11 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
             // Define tus porcentajes aquí. Asegúrate de que sumen aproximadamente 100% (o menos, el 'gap' también usa espacio).
             // Ejemplo: 25% para Cantidad, 25% para P. Unit., 30% para Subtotal, 20% para el botón Eliminar.
             // Ajusta estos valores según la importancia y el tamaño del contenido.
-            headerRow.style.gridTemplateColumns = '25% 25% 30% 20%'; // Porcentajes para Cantidad, P. Unit, Subtotal, Eliminar
+            headerRow.style.gridTemplateColumns = '25% 30% 30% 15%'; // Porcentajes para Cantidad, P. Unit, Subtotal, Eliminar
 
             headerRow.innerHTML = `
-                <div class="text-center">Cant.</div>
-                <div class="text-center">P. Unit.</div>
+                <div class="text-center">Cantidad</div>
+                <div class="text-center">Precio Unit.</div>
                 <div class="text-right">Subtotal</div>
                 <div class="text-center"></div> `;
             cartItemsUl.appendChild(headerRow);
@@ -536,7 +536,7 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
                         <span class="text-sm text-gray-500 block">${item.description}</span>
                     </div>
 
-                    <div class="grid items-center gap-2" style="grid-template-columns: 25% 25% 30% 20%;"> <div class="flex items-center justify-center space-x-0.5 sm:space-x-2">
+                    <div class="grid items-center gap-2" style="grid-template-columns: 25% 30% 30% 15%;"> <div class="flex items-center justify-center space-x-0.5 sm:space-x-2">
                             <button data-product-id="${item.id}" data-action="decrease" class="quantity-btn p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                             </button>
