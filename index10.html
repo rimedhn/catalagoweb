@@ -497,6 +497,22 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
             cartItemsUl.innerHTML = ''; // Limpiar lista del carrito
             let total = 0;
 
+            // ¡NUEVO BLOQUE AQUÍ para los encabezados!
+            if (cart.length > 0) { // Solo muestra los encabezados si hay productos en el carrito
+                const headerRow = document.createElement('li');
+                headerRow.classList.add('py-2', 'flex', 'justify-between', 'items-center', 'text-gray-600', 'font-bold', 'border-b', 'border-gray-300', 'mb-2');
+                headerRow.innerHTML = `
+                    <div class="flex-grow text-left">Producto</div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-16 text-center">Cant.</span>
+                        <span class="ml-4 whitespace-nowrap">P. Unit.</span>
+                        <span class="ml-2 whitespace-nowrap">Subtotal</span>
+                        <span class="w-5 h-5 ml-2"></span> </div>
+                `;
+                cartItemsUl.appendChild(headerRow);
+            }
+            // Fin del nuevo bloque
+
             if (cart.length === 0) {
                 cartItemsUl.innerHTML = '<li class="py-3 text-gray-500">El carrito está vacío.</li>';
                 viewCartFloatingButton.classList.add('hidden'); // Ocultar botón si el carrito está vacío
