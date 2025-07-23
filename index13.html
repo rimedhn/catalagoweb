@@ -672,14 +672,14 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
 let total = 0;
 cart.forEach(item => {
     // Fila 1: Nombre del producto y descripción
-    orderSummary += `- *${item.id}*\n - *${item.description}*\n`; 
+    orderSummary += `- *COD ${item.id}* - *${item.description}*\n`; 
     // Fila 2: Cantidad, Precio Unitario y Subtotal
-    orderSummary += `  Cantidad: ${item.quantity} | Precio Unit: L${item.price.toFixed(2)} | Subtotal: L${(item.price * item.quantity).toFixed(2)}\n\n`; // Agregamos doble salto de línea para separar ítems
+    orderSummary += `  Cantidad: *${item.quantity}* | Precio Unit: *L${item.price.toFixed(2)}* | Subtotal: *L${(item.price * item.quantity).toFixed(2)}*\n\n`; // Agregamos doble salto de línea para separar ítems
     total += item.price * item.quantity;
 });
 
             orderSummary += `\n*Total a Pagar: L${total.toFixed(2)}*\n`;
-            orderSummary += `\n¡Gracias!`;
+            orderSummary += `\n¡Muchas Gracias!`;
 
             const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderSummary)}`;
             window.open(whatsappUrl, '_blank');
