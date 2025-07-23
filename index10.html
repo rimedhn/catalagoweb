@@ -441,6 +441,27 @@
                 addProductToCart(productId, quantity); 
             });
 
+            // Añadir listeners para los botones de cantidad en la tarjeta
+productCard.querySelectorAll('.quantity-card-btn').forEach(button => {
+    button.addEventListener('click', (event) => {
+        const productId = event.currentTarget.getAttribute('data-product-id');
+        const action = event.currentTarget.getAttribute('data-action');
+        const quantityInput = productCard.querySelector(`.quantity-card-input[data-product-id="${productId}"]`);
+        let currentQuantity = parseInt(quantityInput.value);
+
+        if (action === 'increase-card') {
+            currentQuantity++;
+        } else if (action === 'decrease-card' && currentQuantity > 1) {
+            currentQuantity--;
+        }
+        quantityInput.value = currentQuantity;
+    });
+});
+
+// Prevenir que el scroll de la página cambie el valor del input type=number en la tarjeta
+productCard.querySelector('.quantity-card-input').addEventListener('wheel', (event) => {
+    event.preventDefault();
+});
 
         }
 
