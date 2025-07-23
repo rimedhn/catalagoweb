@@ -413,17 +413,15 @@
                 <h3 class="text-xl font-bold text-gray-800 mb-0.5 flex-grow">${product.name}</h3>
                 <p class="text-gray-600 text-sm mb-0.5 line-clamp-3">${product.description}</p>
                 <div class="text-2xl font-extrabold text-green-600 mb-0.5">L${product.price.toFixed(2)}</div>
-
-<div class="flex items-center justify-center space-x-2 mt-2 mb-2">
-    <button data-product-id="${product.id}" data-action="decrease-card" class="quantity-card-btn p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-    </button>
-    <input type="number" value="1" min="1" data-product-id="${product.id}" class="quantity-card-input w-16 text-center border border-gray-300 rounded-md p-1" style="-moz-appearance: textfield; appearance: textfield;">
-    <button data-product-id="${product.id}" data-action="increase-card" class="quantity-card-btn p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-    </button>
-</div>
-                
+                <div class="flex items-center justify-center space-x-2 mt-2 mb-2">
+                <button data-product-id="${product.id}" data-action="decrease-card" class="quantity-card-btn p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                </button>
+                <input type="number" value="1" min="1" data-product-id="${product.id}" class="quantity-card-input w-16 text-center border border-gray-300 rounded-md p-1" style="-moz-appearance: textfield; appearance: textfield;">
+                <button data-product-id="${product.id}" data-action="increase-card" class="quantity-card-btn p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                </button>
+                </div>
                 <button data-product-id="${product.id}" class="mt-auto w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all duration-200 add-to-cart-btn">
                     Agregar al Carrito
                 </button>
@@ -431,38 +429,42 @@
             container.appendChild(productCard);
 
             // Añadir listener para el botón "Agregar al Carrito"
+
+            // Añadir listeners para el botón "Agregar al Carrito"
             productCard.querySelector('.add-to-cart-btn').addEventListener('click', (event) => {
-    const productId = event.target.getAttribute('data-product-id');
-    const quantityInput = productCard.querySelector(`.quantity-card-input[data-product-id="${productId}"]`);
-    const quantity = parseInt(quantityInput.value);
-    addProductToCart(productId, quantity);
-});         
-        
+                const productId = event.target.getAttribute('data-product-id');
+                // Obtenemos el input de cantidad específico de esta tarjeta
+                const quantityInput = productCard.querySelector(`.quantity-card-input[data-product-id="${productId}"]`);
+                const quantity = parseInt(quantityInput.value); // Convertimos el valor a un número
+                
+                // Llamamos a addProductToCart pasando la cantidad obtenida del input
+                addProductToCart(productId, quantity); 
+            });
 
 
-// Añadir listeners para los botones de cantidad en la tarjeta
-productCard.querySelectorAll('.quantity-card-btn').forEach(button => {
-    button.addEventListener('click', (event) => {
-        const productId = event.currentTarget.getAttribute('data-product-id');
-        const action = event.currentTarget.getAttribute('data-action');
-        const quantityInput = productCard.querySelector(`.quantity-card-input[data-product-id="${productId}"]`);
-        let currentQuantity = parseInt(quantityInput.value);
-
-        if (action === 'increase-card') {
-            currentQuantity++;
-        } else if (action === 'decrease-card' && currentQuantity > 1) {
-            currentQuantity--;
         }
-        quantityInput.value = currentQuantity;
-    });
-});
 
-// Prevenir que el scroll de la página cambie el valor del input type=number en la tarjeta
-productCard.querySelector('.quantity-card-input').addEventListener('wheel', (event) => {
-    event.preventDefault();
-});
-        
+        /**
+ * Añade un producto al carrito o incrementa su cantidad si ya existe.
+ * @param {string} productId - El ID del producto.
+ * @param {number} quantityToAdd - La cantidad a añadir.
+ */
+function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ! Añadimos quantityToAdd con un valor por defecto.
+    const product = allProducts.find(p => p.id == productId); // Usar '==' para comparación flexible de ID
+    if (product) {
+        const existingItem = cart.find(item => item.id == productId);
+        if (existingItem) {
+            existingItem.quantity += quantityToAdd; // <-- ¡CAMBIO AQUÍ! Usamos quantityToAdd
+        } else {
+            cart.push({ ...product, quantity: quantityToAdd }); // <-- ¡CAMBIO AQUÍ! Usamos quantityToAdd
         }
+        renderCart();
+        updateFloatingCartButton(); // Actualizar el estado del botón flotante
+        showCustomAlert(`${product.name} ha sido agregado al carrito.`);
+    } else {
+        showCustomAlert('Error: Producto no encontrado.');
+    }
+}
 
         /**
          * Renderiza los productos en el carrito y actualiza el total.
