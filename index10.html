@@ -506,7 +506,7 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
                 headerRow.style.display = 'grid'; // <-- Usamos display grid
                 // Definimos las columnas:
                 // 1fr para el producto (flexible), y anchos fijos para cantidad, p. unitario, subtotal y botón de eliminar
-                headerRow.style.gridTemplateColumns = '2fr 80px 100px 120px 40px'; // <-- ¡AJUSTA ESTOS VALORES SI ES NECESARIO!
+                headerRow.style.gridTemplateColumns = '3fr 80px 130px 120px 40px'; // <-- ¡AJUSTA ESTOS VALORES SI ES NECESARIO!
                 headerRow.innerHTML = `
                     <div class="text-left">Producto</div>
                     <div class="text-center">Cant.</div>
@@ -529,7 +529,7 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
                 
                 listItem.style.display = 'grid'; // <-- Usamos display grid aquí también
                 // Las columnas deben coincidir EXACTAMENTE con las de los encabezados
-                listItem.style.gridTemplateColumns = '2fr 100px 130px 120px 40px'; // <-- ¡MISMOS VALORES QUE ARRIBA!
+                listItem.style.gridTemplateColumns = '3fr 80px 130px 120px 40px'; // <-- ¡MISMOS VALORES QUE ARRIBA!
                 listItem.innerHTML = `
                     <div class="text-left">
                         <span class="font-semibold">${item.name}</span>
