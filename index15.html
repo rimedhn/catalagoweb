@@ -268,6 +268,7 @@ if (whatsappFloatingButton) {
         const viewCartFloatingButton = document.getElementById('viewCartFloatingButton');
         const cartItemCountSpan = document.getElementById('cartItemCount');
         const cartModalCloseButton = document.getElementById('cartModalCloseButton');
+        const searchBar = document.getElementById('searchBar'); 
 
         /**
          * Carga los productos desde el Google Sheet publicado como CSV.
@@ -356,62 +357,73 @@ if (whatsappFloatingButton) {
          * Si la categoría es 'Todos', los productos se agrupan y ordenan por categoría.
          */
         function renderProducts(filterCategory) {
-            const productGrid = document.getElementById('productGrid');
-            productGrid.innerHTML = ''; // Limpiar productos existentes
+    const productGrid = document.getElementById('productGrid');
+    productGrid.innerHTML = ''; // Limpiar productos existentes
 
-            let productsToDisplay = [];
-            if (filterCategory === 'Todos') {
-                // Si es 'Todos', agrupar por categoría y luego ordenar por nombre
-                const groupedProducts = {};
-                allProducts.forEach(product => {
-                    if (!groupedProducts[product.category]) {
-                        groupedProducts[product.category] = [];
-                    }
-                    groupedProducts[product.category].push(product);
-                });
+    let productsToProcess = [];
 
-                // Ordenar categorías alfabéticamente
-                const sortedCategories = Array.from(categories).sort();
+    // Paso 1: Filtrar por categoría
+    if (filterCategory === 'Todos') {
+        productsToProcess = allProducts; // Trabaja con todos los productos si no hay filtro de categoría
+    } else {
+        productsToProcess = allProducts.filter(product => product.category === filterCategory);
+    }
 
-                sortedCategories.forEach(category => {
-                    if (groupedProducts[category]) {
-                        // Añadir un encabezado para la categoría
-                        const categoryHeader = document.createElement('h2');
-                        categoryHeader.classList.add('col-span-full', 'text-2xl', 'font-bold', 'text-gray-700', 'mt-6', 'mb-4', 'border-b-2', 'border-gray-200', 'pb-2');
-                        categoryHeader.textContent = category;
-                        productGrid.appendChild(categoryHeader);
+    // Paso 2: Filtrar por término de búsqueda (después del filtro de categoría)
+    const searchTerm = searchBar.value.toLowerCase(); // Obtiene el término de búsqueda actual
+    let finalProductsToDisplay = productsToProcess.filter(product => {
+        // Busca el término en nombre, descripción, o cualquier campo que quieras (agrega más || si necesitas)
+        return product.name.toLowerCase().includes(searchTerm) ||
+               product.description.toLowerCase().includes(searchTerm) ||
+               (product.category && product.category.toLowerCase().includes(searchTerm)) || // Busca también en la categoría
+               (product.price && product.price.toString().includes(searchTerm)); // Busca en el precio (convirtiéndolo a string)
+    });
 
-                        // Ordenar productos dentro de cada categoría por nombre
-                        const sortedCategoryProducts = groupedProducts[category].sort((a, b) =>
-                            a.name.localeCompare(b.name)
-                        );
 
-                        sortedCategoryProducts.forEach(product => {
-                            createProductCard(productGrid, product);
-                        });
-                    }
-                });
+    // Si no hay productos después de los filtros
+    if (finalProductsToDisplay.length === 0) {
+        productGrid.innerHTML = '<p class="text-center text-gray-600 col-span-full">No se encontraron productos que coincidan con los filtros aplicados.</p>';
+        return;
+    }
 
-            } else {
-                // Si es una categoría específica, filtrar y ordenar por nombre
-                productsToDisplay = allProducts
-                    .filter(product => product.category === filterCategory)
-                    .sort((a, b) => a.name.localeCompare(b.name));
+    // Paso 3: Agrupar y renderizar si la categoría seleccionada es 'Todos'
+    if (filterCategory === 'Todos') {
+        const groupedProducts = {};
+        finalProductsToDisplay.forEach(product => { // Ahora opera sobre finalProductsToDisplay
+            if (!groupedProducts[product.category]) {
+                groupedProducts[product.category] = [];
+            }
+            groupedProducts[product.category].push(product);
+        });
 
-                if (productsToDisplay.length === 0) {
-                    productGrid.innerHTML = `<p class="text-center text-gray-600 col-span-full">No hay productos disponibles en la categoría "${filterCategory}".</p>`;
-                    return;
-                }
+        const sortedCategories = Array.from(categories).sort();
 
-                productsToDisplay.forEach(product => {
+        sortedCategories.forEach(category => {
+            if (groupedProducts[category] && groupedProducts[category].length > 0) {
+                const categoryHeader = document.createElement('h2');
+                categoryHeader.classList.add('col-span-full', 'text-2xl', 'font-bold', 'text-gray-700', 'mt-6', 'mb-4', 'border-b-2', 'border-gray-200', 'pb-2');
+                categoryHeader.textContent = category;
+                productGrid.appendChild(categoryHeader);
+
+                const sortedCategoryProducts = groupedProducts[category].sort((a, b) =>
+                    a.name.localeCompare(b.name)
+                );
+
+                sortedCategoryProducts.forEach(product => {
                     createProductCard(productGrid, product);
                 });
             }
+        });
+    } else {
+        // Paso 4: Renderizar directamente si es una categoría específica (ya viene filtrada y ordenada por nombre)
+        finalProductsToDisplay.sort((a, b) => a.name.localeCompare(b.name));
+        finalProductsToDisplay.forEach(product => {
+            createProductCard(productGrid, product);
+        });
+    }
 
-            if (allProducts.length === 0) {
-                productGrid.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay productos disponibles.</p>';
-            }
-        }
+    // Nota: El manejo del caso de 'No hay productos disponibles' se hace al inicio con finalProductsToDisplay.
+}
 
         /**
          * Crea y añade una tarjeta de producto al contenedor dado.
@@ -719,6 +731,15 @@ cart.forEach(item => {
             if (categorySelect) {
                 categorySelect.addEventListener('change', (event) => {
                     renderProducts(event.target.value); // Llama a renderProducts para filtrar
+                });
+            }
+
+            // Listener para la barra de búsqueda
+            const searchBar = document.getElementById('searchBar'); // Make sure this line exists!
+            if (searchBar) { // Add a check to ensure searchBar exists before adding listener
+                searchBar.addEventListener('input', function() {
+                    // When typing, call renderProducts with the currently selected category
+                    renderProducts(categorySelect.value);
                 });
             }
 
