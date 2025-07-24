@@ -154,7 +154,7 @@
         <div class="cart-modal-content">
             <button id="cartModalCloseButton" class="cart-modal-close-button">&times;</button>
             <h2 class="text-3xl font-bold text-gray-700 mb-6 flex items-center">
-                <span class="mr-2">🛒</span> Tu Carrito
+                <span class="mr-2">🛒</span> Tu Carrito de compra
             </h2>
 
             <div class="bg-gray-50 p-4 rounded-lg mb-6 shadow-sm">
@@ -211,70 +211,69 @@
     <script>
       
         // Función para mostrar un modal personalizado en lugar de alert()
-function showCustomAlert(message) {
+// Ahora acepta un parámetro 'buttonType' que puede ser 'cartConfirmation' o null (para el default 'Aceptar')
+function showCustomAlert(message, buttonType = null) {
     const modal = document.getElementById('customAlertModal');
     const msgElement = document.getElementById('customAlertMessage');
-    const closeButton = document.getElementById('customAlertCloseButton'); // Este es tu botón "Aceptar" actual
-
+    const closeButton = document.getElementById('customAlertCloseButton');
+    
     // Asignar el mensaje
     msgElement.textContent = message;
 
-    // Quitar la clase 'hidden' para mostrar el modal
-    modal.classList.remove('hidden');
+    // Asegurarse de que el modal esté oculto antes de mostrarlo para animaciones, si las hay
+    modal.classList.add('hidden'); 
+    modal.classList.remove('hidden'); // Mostrar el modal
 
-    // --- MODIFICACIONES CLAVE AQUÍ ---
-
-    // 1. Reconfigurar el botón existente para que sea "Volver"
-    closeButton.textContent = 'Volver';
-    closeButton.className = 'px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400';
-    
-    // Limpiar cualquier listener previo para evitar duplicados al reabrir el modal
+    // Limpiar cualquier listener previo del botón principal para evitar duplicados
     closeButton.onclick = null; 
-    closeButton.onclick = () => {
-        modal.classList.add('hidden'); // Ocultar el modal
-    };
 
-    // 2. Crear y configurar el nuevo botón "Ver Carrito"
-    const viewCartButton = document.createElement('button');
-    viewCartButton.textContent = 'Ver Carrito';
-    viewCartButton.className = 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ml-4'; // Añade ml-4 para margen izquierdo
-
-    // Limpiar cualquier listener previo si el botón se recrea
-    viewCartButton.onclick = null;
-    viewCartButton.onclick = () => {
-        modal.classList.add('hidden'); // Ocultar la alerta de confirmación
-        
-        // Mostrar el modal del carrito
-        const cartModal = document.getElementById('cartModal'); // USAMOS EL ID REAL DE TU MODAL DE CARRITO
-        if (cartModal) {
-            cartModal.classList.remove('hidden'); // Asegúrate de que tu modal de carrito usa 'hidden' para ocultarse
-            // Si tu modal de carrito tiene alguna animación de aparición,
-            // puede que necesites un pequeño setTimeout aquí antes de 'remove('hidden')'
-        } else {
-            console.warn("Modal del carrito no encontrado. Asegúrate de que el div de tu carrito tenga id='cartModal'.");
-        }
-    };
-
-    // 3. Añadir el nuevo botón junto al existente
-    const buttonsContainer = closeButton.parentNode; // El div que contiene el botón de Aceptar
-    
-    // Remover el botón "Ver Carrito" si ya existía de una alerta anterior para evitar duplicados
+    // Limpiar botones adicionales si existen de una llamada anterior
+    const buttonsContainer = closeButton.parentNode;
     const existingViewCartButton = buttonsContainer.querySelector('.view-cart-btn-temp');
     if (existingViewCartButton) {
         existingViewCartButton.remove();
     }
-    viewCartButton.classList.add('view-cart-btn-temp'); // Añade una clase temporal para identificarlo y removerlo
 
-    buttonsContainer.appendChild(viewCartButton); // Añadir el botón "Ver Carrito" al mismo contenedor
+    // --- Lógica para el tipo de botones ---
+    if (buttonType === 'cartConfirmation') {
+        // Configuración para los botones "Volver" y "Ver Carrito"
 
+        closeButton.textContent = 'Volver';
+        closeButton.className = 'px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400';
+        closeButton.onclick = () => {
+            modal.classList.add('hidden'); // Ocultar el modal de alerta
+        };
 
-    // 4. Mantener o modificar el comportamiento de cierre al hacer clic fuera del modal
+        const viewCartButton = document.createElement('button');
+        viewCartButton.textContent = 'Ver Carrito';
+        viewCartButton.className = 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ml-4 view-cart-btn-temp';
+        viewCartButton.onclick = () => {
+            modal.classList.add('hidden'); // Ocultar la alerta de confirmación
+            
+            // Mostrar el modal del carrito
+            const cartModal = document.getElementById('cartModal'); // Usamos el ID real de tu modal de carrito
+            if (cartModal) {
+                cartModal.classList.remove('hidden'); // Asegúrate de que tu modal de carrito usa 'hidden' para ocultarse/mostrar
+                // Si tu modal tiene otras clases como 'opacity-0 invisible', tendrás que ajustarlo aquí
+            } else {
+                console.warn("Modal del carrito no encontrado. Asegúrate de que el div de tu carrito tenga id='cartModal'.");
+            }
+        };
+        buttonsContainer.appendChild(viewCartButton); // Añadir el botón "Ver Carrito"
+        
+    } else {
+        // Configuración por defecto: un solo botón "Aceptar"
+        closeButton.textContent = 'Aceptar';
+        closeButton.className = 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500';
+        closeButton.onclick = () => {
+            modal.classList.add('hidden'); // Ocultar el modal de alerta
+        };
+    }
+
+    // Opcional: Cerrar modal al hacer clic fuera de él (si deseas mantener esta funcionalidad)
     modal.onclick = (event) => {
         if (event.target === modal) {
-            // Actualmente, tu HTML NO oculta el modal al hacer clic fuera
-            // porque tiene 'hidden' y no 'opacity-0 invisible' con transición.
-            // Si quieres que el clic fuera CIERRE la alerta, descomenta la línea de abajo.
-            // modal.classList.add('hidden'); 
+            // modal.classList.add('hidden'); // Descomenta si quieres que el clic fuera siga cerrando la alerta
         }
     };
 }
@@ -425,7 +424,8 @@ if (whatsappFloatingButton) {
         return product.name.toLowerCase().includes(searchTerm) ||
                product.description.toLowerCase().includes(searchTerm) ||
                (product.category && product.category.toLowerCase().includes(searchTerm)) || // Busca también en la categoría
-               (product.price && product.price.toString().includes(searchTerm)); // Busca en el precio (convirtiéndolo a string)
+               (product.id && product.id.toLowerCase().includes(searchTerm)) || // Busca también en el id
+               (product.price && product.price.toString().includes(searchTerm));   // Busca en el precio (convirtiéndolo a string)
     });
 
 
@@ -508,8 +508,6 @@ if (whatsappFloatingButton) {
             `;
             container.appendChild(productCard);
 
-            // Añadir listener para el botón "Agregar al Carrito"
-
             // Añadir listeners para el botón "Agregar al Carrito"
             productCard.querySelector('.add-to-cart-btn').addEventListener('click', (event) => {
                 const productId = event.target.getAttribute('data-product-id');
@@ -561,7 +559,7 @@ function addProductToCart(productId, quantityToAdd = 1) { // <-- ¡CAMBIO AQUÍ!
         }
         renderCart();
         updateFloatingCartButton(); // Actualizar el estado del botón flotante
-        showCustomAlert(`${product.id} - ${product.description} ha sido agregado al carrito.`);
+        showCustomAlert(`${product.id} - ${product.description} ha sido agregado al carrito.`, `cartConfirmation`);
     } else {
         showCustomAlert('Error: Producto no encontrado.');
     }
