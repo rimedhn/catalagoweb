@@ -221,8 +221,9 @@ function showCustomAlert(message, buttonType = null) {
     msgElement.textContent = message;
 
     // Asegurarse de que el modal esté oculto antes de mostrarlo para animaciones, si las hay
+    // Quitar 'hidden' para permitir que se muestre, y luego la lógica de buttonType decidirá los botones.
     modal.classList.add('hidden'); 
-    modal.classList.remove('hidden'); // Mostrar el modal
+    modal.classList.remove('hidden'); // Mostrar el modal principal de la alerta
 
     // Limpiar cualquier listener previo del botón principal para evitar duplicados
     closeButton.onclick = null; 
@@ -247,14 +248,19 @@ function showCustomAlert(message, buttonType = null) {
         const viewCartButton = document.createElement('button');
         viewCartButton.textContent = 'Ver Carrito';
         viewCartButton.className = 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ml-4 view-cart-btn-temp';
+        
         viewCartButton.onclick = () => {
             modal.classList.add('hidden'); // Ocultar la alerta de confirmación
             
             // Mostrar el modal del carrito
             const cartModal = document.getElementById('cartModal'); // Usamos el ID real de tu modal de carrito
             if (cartModal) {
-                cartModal.classList.remove('hidden'); // Asegúrate de que tu modal de carrito usa 'hidden' para ocultarse/mostrar
-                // Si tu modal tiene otras clases como 'opacity-0 invisible', tendrás que ajustarlo aquí
+                // *** LA MODIFICACIÓN CLAVE ESTÁ AQUÍ ***
+                // Tus CSS usan la clase 'show' para hacer visible el carrito.
+                // Asegúrate de que no tenga 'hidden' (aunque tu HTML no lo muestra inicialmente, es buena práctica)
+                cartModal.classList.remove('hidden'); 
+                cartModal.classList.add('show'); // ¡Aplica la clase 'show' para que tus CSS lo muestren!
+                
             } else {
                 console.warn("Modal del carrito no encontrado. Asegúrate de que el div de tu carrito tenga id='cartModal'.");
             }
@@ -273,7 +279,9 @@ function showCustomAlert(message, buttonType = null) {
     // Opcional: Cerrar modal al hacer clic fuera de él (si deseas mantener esta funcionalidad)
     modal.onclick = (event) => {
         if (event.target === modal) {
-            // modal.classList.add('hidden'); // Descomenta si quieres que el clic fuera siga cerrando la alerta
+            // El modal de alerta tiene 'hidden' por defecto en tu HTML.
+            // Si quieres que el clic fuera CIERRE la alerta, descomenta la línea de abajo.
+            // modal.classList.add('hidden'); 
         }
     };
 }
