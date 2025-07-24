@@ -126,17 +126,11 @@
                         </select>
                 </div>
                 <div class="mb-4">
-                <label for="categorySelect" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Categoría:</label>
-                <select id="categorySelect" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    </select>
-                </div>
-                
-                <div class="mb-4">
-                    <input type="text" id="searchBar" placeholder="Buscar productos por nombre o descripción..." class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <input type="text" id="searchBar" placeholder="Buscar productos..." class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
                 </div>
                 
                 <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    </div>
+                </div>
                 </aside>
 
             <main class="lg:w-3/4">
@@ -269,7 +263,7 @@ if (whatsappFloatingButton) {
                 // --- FIN DEL CÓDIGO NUEVO PARA EL BOTÓN FLOTANTE DE WHATSAPP ---
         
         let allProducts = []; // Almacena todos los productos cargados
-        const categories = new Set(); // Almacena las categorías únicas
+        let categories = new Set(); // Almacena las categorías únicas
         let cart = []; // Almacena los productos en el carrito
 
         // Referencias a elementos del DOM
@@ -277,70 +271,68 @@ if (whatsappFloatingButton) {
         const viewCartFloatingButton = document.getElementById('viewCartFloatingButton');
         const cartItemCountSpan = document.getElementById('cartItemCount');
         const cartModalCloseButton = document.getElementById('cartModalCloseButton');
-        // --- NUEVAS REFERENCIAS DOM (añade esto al principio de tus referencias DOM) ---
-        const searchBar = document.getElementById('searchBar');
 
         /**
          * Carga los productos desde el Google Sheet publicado como CSV.
          * Filtra los productos que no están en estado 'Activo'.
          * Extrae las categorías únicas y renderiza los filtros y productos.
          */
-async function loadProducts() {
-    try {
-        const response = await fetch(PRODUCTS_JSON_URL);
-        const data = await response.json();
-        allProducts = data.productos; // Asume que 'productos' es la clave correcta
+        async function loadProducts() {
+            try {
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvText = await response.text();
+                const lines = csvText.split('\n').filter(line => line.trim() !== ''); // Eliminar líneas vacías
 
-        categories.clear();
-        allProducts.forEach(product => {
-            if (product.category) {
-                categories.add(product.category);
+                if (lines.length < 2) {
+                    showCustomAlert('No hay datos válidos en el Google Sheet.');
+                    document.getElementById('productGrid').innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay productos disponibles.</p>';
+                    return;
+                }
+
+                const headers = lines[0].split(',').map(header => header.trim());
+
+                // Mapeo de encabezados para asegurar nombres de propiedades consistentes
+                const headerMap = {
+                    'ID': 'id',
+                    'Nombre Producto': 'name',
+                    'Descripción': 'description',
+                    'Precio': 'price',
+                    'Categoría': 'category',
+                    'Imagen URL': 'imageUrl',
+                    'Estado': 'status'
+                };
+
+                allProducts = lines.slice(1).map(line => {
+                    const values = line.split(',');
+                    let product = {};
+                    headers.forEach((header, index) => {
+                        const propName = headerMap[header] || header.toLowerCase().replace(/\s/g, '');
+                        product[propName] = values[index] ? values[index].trim() : '';
+                    });
+                    // Asegurar que el precio sea un número
+                    product.price = parseFloat(product.price || 0); // Default a 0 si no es válido
+                    return product;
+                }).filter(product => product.status && product.status.toLowerCase() === 'activo'); // Filtrar por estado 'Activo'
+
+                // Extraer categorías únicas
+                categories.clear(); // Limpiar el Set de categorías antes de añadir
+                allProducts.forEach(product => {
+                    if (product.category) {
+                        categories.add(product.category);
+                    }
+                });
+
+                populateCategorySelect(); // Llenar el <select>
+                renderProducts('Todos'); // Mostrar todos los productos por defecto
+            } catch (error) {
+                console.error('Error al cargar los productos:', error);
+                showCustomAlert('Error al cargar los productos. Por favor, verifica la URL del Google Sheet y tu conexión a internet.');
+                document.getElementById('productGrid').innerHTML = '<p class="text-center text-red-500 col-span-full">Error al cargar los productos.</p>';
             }
-        });
-
-        populateCategorySelect(); // Llenar el <select>
-
-        // LLAMADA CLAVE: Usar la nueva función applyFilters al cargar los productos
-        applyFilters(); 
-
-    } catch (error) {
-        console.error('Error al cargar los productos:', error);
-        showCustomAlert('Error al cargar los productos. Por favor, verifica la URL del Google Sheet y tu conexión a internet.');
-        document.getElementById('productGrid').innerHTML = '<p class="text-center text-red-500 col-span-full">Error al cargar los productos.</p>';
-    }
-}
-
-
-// --- NUEVA FUNCIÓN: applyFilters ---
-// (Añade esta función en tu JavaScript)
-/**
- * Aplica los filtros de categoría y búsqueda a los productos y los renderiza.
- */
-function applyFilters() {
-    const selectedCategory = categorySelect.value;
-    const searchTerm = searchBar.value.toLowerCase(); // Término de búsqueda en minúsculas
-
-    let productsToFilter = allProducts;
-
-    // 1. Filtrar por categoría
-    if (selectedCategory !== 'Todos') {
-        productsToFilter = productsToFilter.filter(product => product.category === selectedCategory);
-    }
-
-    // 2. Filtrar por término de búsqueda (en nombre, descripción o cualquier campo)
-    const finalFilteredProducts = productsToFilter.filter(product => {
-        // Convierte el objeto product a un string en minúsculas para buscar en todos sus valores
-        const productString = JSON.stringify(product).toLowerCase();
-        // O si prefieres buscar solo en nombre y descripción:
-        // const productString = `${product.name} ${product.description}`.toLowerCase();
-
-        return productString.includes(searchTerm);
-    });
-
-    // 3. Renderizar los productos resultantes
-    renderProducts(finalFilteredProducts, selectedCategory); // Pasamos los productos ya filtrados
-}
-
+        }
 
         /**
          * Rellena el elemento <select> de categorías con las categorías únicas.
@@ -363,59 +355,66 @@ function applyFilters() {
         // deberías añadir estilos CSS para el <select> y/o su opción seleccionada.
 
         /**
- * Renderiza las tarjetas de productos en la cuadrícula.
- * @param {Array} productsToDisplay - El array de productos ya filtrados a mostrar.
- * @param {string} currentFilterCategory - La categoría actualmente seleccionada (ej. 'Todos', 'Ropa').
- */
-function renderProducts(productsToDisplay, currentFilterCategory) {
-    const productGrid = document.getElementById('productGrid');
-    productGrid.innerHTML = ''; // Limpiar productos existentes
+         * Renderiza las tarjetas de productos en la cuadrícula.
+         * Si la categoría es 'Todos', los productos se agrupan y ordenan por categoría.
+         */
+        function renderProducts(filterCategory) {
+            const productGrid = document.getElementById('productGrid');
+            productGrid.innerHTML = ''; // Limpiar productos existentes
 
-    if (productsToDisplay.length === 0) {
-        productGrid.innerHTML = `<p class="text-center text-gray-600 col-span-full">No se encontraron productos que coincidan con los filtros.</p>`;
-        return;
-    }
+            let productsToDisplay = [];
+            if (filterCategory === 'Todos') {
+                // Si es 'Todos', agrupar por categoría y luego ordenar por nombre
+                const groupedProducts = {};
+                allProducts.forEach(product => {
+                    if (!groupedProducts[product.category]) {
+                        groupedProducts[product.category] = [];
+                    }
+                    groupedProducts[product.category].push(product);
+                });
 
-    if (currentFilterCategory === 'Todos') {
-        // Agrupar y ordenar por categoría solo si el filtro principal es 'Todos'
-        const groupedProducts = {};
-        productsToDisplay.forEach(product => { // Ahora opera sobre productsToDisplay
-            if (!groupedProducts[product.category]) {
-                groupedProducts[product.category] = [];
-            }
-            groupedProducts[product.category].push(product);
-        });
+                // Ordenar categorías alfabéticamente
+                const sortedCategories = Array.from(categories).sort();
 
-        const sortedCategories = Array.from(categories).sort(); // Usa el Set global de categorías
+                sortedCategories.forEach(category => {
+                    if (groupedProducts[category]) {
+                        // Añadir un encabezado para la categoría
+                        const categoryHeader = document.createElement('h2');
+                        categoryHeader.classList.add('col-span-full', 'text-2xl', 'font-bold', 'text-gray-700', 'mt-6', 'mb-4', 'border-b-2', 'border-gray-200', 'pb-2');
+                        categoryHeader.textContent = category;
+                        productGrid.appendChild(categoryHeader);
 
-        sortedCategories.forEach(category => {
-            if (groupedProducts[category] && groupedProducts[category].length > 0) { // Asegurarse de que haya productos en la categoría filtrada
-                const categoryHeader = document.createElement('h2');
-                categoryHeader.classList.add('col-span-full', 'text-2xl', 'font-bold', 'text-gray-700', 'mt-6', 'mb-4', 'border-b-2', 'border-gray-200', 'pb-2');
-                categoryHeader.textContent = category;
-                productGrid.appendChild(categoryHeader);
+                        // Ordenar productos dentro de cada categoría por nombre
+                        const sortedCategoryProducts = groupedProducts[category].sort((a, b) =>
+                            a.name.localeCompare(b.name)
+                        );
 
-                const sortedCategoryProducts = groupedProducts[category].sort((a, b) =>
-                    a.name.localeCompare(b.name)
-                );
+                        sortedCategoryProducts.forEach(product => {
+                            createProductCard(productGrid, product);
+                        });
+                    }
+                });
 
-                sortedCategoryProducts.forEach(product => {
+            } else {
+                // Si es una categoría específica, filtrar y ordenar por nombre
+                productsToDisplay = allProducts
+                    .filter(product => product.category === filterCategory)
+                    .sort((a, b) => a.name.localeCompare(b.name));
+
+                if (productsToDisplay.length === 0) {
+                    productGrid.innerHTML = `<p class="text-center text-gray-600 col-span-full">No hay productos disponibles en la categoría "${filterCategory}".</p>`;
+                    return;
+                }
+
+                productsToDisplay.forEach(product => {
                     createProductCard(productGrid, product);
                 });
             }
-        });
-    } else {
-        // Si es una categoría específica o resultado de búsqueda dentro de una, simplemente renderiza
-        // Ya vienen filtrados y ordenados desde applyFilters si el filtro es por categoría.
-        // Aquí solo se ordenan por nombre si el filtro de categoría no era 'Todos'
-        productsToDisplay.sort((a, b) => a.name.localeCompare(b.name));
-        productsToDisplay.forEach(product => {
-            createProductCard(productGrid, product);
-        });
-    }
 
-    // Ya no es necesario el último if (allProducts.length === 0) aquí, lo cubre el primer if (productsToDisplay.length === 0)
-}
+            if (allProducts.length === 0) {
+                productGrid.innerHTML = '<p class="text-center text-gray-600 col-span-full">No hay productos disponibles.</p>';
+            }
+        }
 
         /**
          * Crea y añade una tarjeta de producto al contenedor dado.
@@ -719,15 +718,12 @@ cart.forEach(item => {
             loadProducts(); // Cargar productos al cargar la página
 
             // Event listener para el nuevo selector de categorías
-            const categorySelect = document.getElementById('categorySelect').addEventListener('change', applyFilters);
+            const categorySelect = document.getElementById('categorySelect');
             if (categorySelect) {
                 categorySelect.addEventListener('change', (event) => {
                     renderProducts(event.target.value); // Llama a renderProducts para filtrar
                 });
             }
-
-            // Añadir Event Listener para el campo de búsqueda
-searchBar.addEventListener('input', applyFilters); // 'input' detecta cada tecla presionada
 
             document.getElementById('checkoutButton').addEventListener('click', sendWhatsAppOrder); // Botón de WhatsApp
 
