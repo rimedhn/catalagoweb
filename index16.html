@@ -497,7 +497,10 @@ if (whatsappFloatingButton) {
             const imageUrl = product.imageUrl || `https://placehold.co/300x200/e0e0e0/555555?text=${encodeURIComponent(product.name || 'Producto')}`;
 
             productCard.innerHTML = `
-            <a href="${imageUrl}" data-fslightbox="producto-galeria" data-title="${product.name}">
+            <a href="${imageUrl}"
+               data-fslightbox
+               data-type="image"
+               data-title="${product.name}">
                 <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-contain rounded-md mb-2" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e0e0e0/555555?text=Imagen+no+disponible';">
             </a>
                 <h3 class="text-xl font-bold text-gray-800 mb-0.5 flex-grow">${product.name}</h3>
@@ -833,15 +836,7 @@ cart.forEach(item => {
             showCustomAlert("¡BIENVENIDO! AGREGA PRODUCTOS AL CARRITO DE COMPRA, TUS DATOS Y ENVÍA TU PEDIDO POR WHATSAPP!");
         });
 
-// Ejemplo genérico, consulta la documentación de la librería específica
-//document.addEventListener('DOMContentLoaded', function() {
-    // Si usas SimpleLightbox:
-    //var lightbox = new SimpleLightbox('.product-gallery a');
-    // Si usas fslightbox.js (solo necesitas los atributos data-fslightbox en el HTML):
-    // RefreshFsLightbox();
-    // Si usas GLightbox:
-    // var lightbox = GLightbox({ selector: '[data-lightbox]' });
-//});
+
         
     </script>
 
