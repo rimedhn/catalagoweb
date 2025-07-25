@@ -6,6 +6,8 @@
     <title>Catálogo de Productos</title>
     <link rel="icon" href="https://raw.githubusercontent.com/rimedhn/demo/refs/heads/main/Logo.png" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="path/to/your-lightbox-library.min.css">
+    <script src="path/to/your-lightbox-library.min.js"></script>
     <style>
         /* Estilos personalizados para la fuente y algunos ajustes */
         body {
@@ -497,7 +499,9 @@ if (whatsappFloatingButton) {
             const imageUrl = product.imageUrl || `https://placehold.co/300x200/e0e0e0/555555?text=${encodeURIComponent(product.name || 'Producto')}`;
 
             productCard.innerHTML = `
+            <a href="${imageUrl}" data-lightbox="product-gallery" data-title="${product.name}">
                 <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-contain rounded-md mb-2" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e0e0e0/555555?text=Imagen+no+disponible';">
+            </a>
                 <h3 class="text-xl font-bold text-gray-800 mb-0.5 flex-grow">${product.name}</h3>
                 <p class="text-gray-600 text-sm mb-0.5 line-clamp-3">${product.description}</p>
                 <div class="text-2xl font-extrabold text-green-600 mb-0.5">L${product.price.toFixed(2)}</div>
@@ -830,6 +834,17 @@ cart.forEach(item => {
             // Mensaje de bienvenida al cargar la página
             showCustomAlert("¡BIENVENIDO! AGREGA PRODUCTOS AL CARRITO DE COMPRA, TUS DATOS Y ENVÍA TU PEDIDO POR WHATSAPP!");
         });
+
+// Ejemplo genérico, consulta la documentación de la librería específica
+document.addEventListener('DOMContentLoaded', function() {
+    // Si usas SimpleLightbox:
+    var lightbox = new SimpleLightbox('.product-gallery a');
+    // Si usas fslightbox.js (solo necesitas los atributos data-fslightbox en el HTML):
+    // RefreshFsLightbox();
+    // Si usas GLightbox:
+    // var lightbox = GLightbox({ selector: '[data-lightbox]' });
+});
+        
     </script>
 
          
