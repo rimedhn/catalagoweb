@@ -54,12 +54,12 @@
                 <div id="categoryFilters" class="w-full">
                     <select id="categorySelect" class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="Todos">Todas las Categorías</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="mb-4 mt-4">
                 <input type="text" id="searchBar" placeholder="Buscar productos..." class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
                 </div>
-                </aside>
+            </aside>
 
             <main class="lg:w-3/4">
                 <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -139,8 +139,8 @@
     </div>
     
     <script>
-        // URL JSON de gsx2json (si tienes varias hojas, añade &sheet=Hoja1)
-        const GSX2JSON_URL = 'https://gsx2json.com/api?id=1ZI3GIGK5AjIyk2MTg-XRtigiDx7wZlkHOk6lYqO2VYc';
+        // URL JSON de opensheet.elk.sh para la hoja 'demo1'
+        const OPENSHEET_URL = 'https://opensheet.elk.sh/1ZI3GIGK5AjIyk2MTg-XRtigiDx7wZlkHOk6lYqO2VYc/demo1';
 
         // Reemplaza con tu número de WhatsApp
         const WHATSAPP_NUMBER = '50493593126';
@@ -206,20 +206,22 @@
         // --- Cargar productos desde JSON ---
         async function loadProducts() {
             try {
-                const response = await fetch(GSX2JSON_URL);
+                const response = await fetch(OPENSHEET_URL);
                 const data = await response.json();
-                // Ajusta los nombres según tu hoja (los campos salen en minúsculas y sin acentos ni espacios)
-                allProducts = (data.rows || [])
+                console.log("Datos recibidos:", data); // <-- Verifica aquí
+
+                allProducts = data
                     .map(product => ({
-                        id: product.id,
-                        name: product.nombre_producto,
-                        description: product.descripcion,
-                        price: parseFloat(product.precio),
-                        category: product.categoria,
-                        imageUrl: product.imagen_url,
-                        status: product.estado
+                        id: product["ID"],
+                        name: product["Nombre Producto"],
+                        description: product["Descripción"],
+                        price: parseFloat(product["Precio"]),
+                        category: product["Categoría"],
+                        imageUrl: product["Imagen URL"],
+                        status: product["Estado"]
                     }))
                     .filter(product => product.status && product.status.toLowerCase() === 'activo');
+
                 categories.clear();
                 allProducts.forEach(product => {
                     if (product.category) categories.add(product.category);
@@ -228,7 +230,7 @@
                 renderProducts('Todos');
             } catch (error) {
                 console.error('Error al cargar los productos:', error);
-                showCustomAlert('Error al cargar los productos desde la hoja de Google. Por favor, verifica la publicación y estructura.');
+                showCustomAlert('Error al cargar los productos desde la hoja de Google.');
                 document.getElementById('productGrid').innerHTML = '<p class="text-center text-red-500 col-span-full">Error al cargar los productos.</p>';
             }
         }
