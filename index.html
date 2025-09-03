@@ -560,30 +560,40 @@
         }
 
         // --- PayPal Integration ---
-        let paypalScriptLoaded = false;
-        function loadPayPalScriptAndRenderButton() {
-            // Solo carga si hay productos y Client ID válido
-            if (!CONFIG.PAYPAL_CLIENT_ID || cart.length === 0) {
-                document.getElementById('paypal-button-container').innerHTML = '';
-                return;
-            }
-            // Si ya está cargado, renderiza el botón
-            if (paypalScriptLoaded) {
-                renderPayPalButton();
-                return;
-            }
-            // Si el script no está, lo carga
-            if (!document.getElementById('paypal-sdk')) {
-                const script = document.createElement('script');
-                script.id = 'paypal-sdk';
-                script.src = `https://www.paypal.com/sdk/js?client-id=${CONFIG.PAYPAL_CLIENT_ID}&currency=USD`;
-                script.onload = () => {
-                    paypalScriptLoaded = true;
+let paypalScriptLoaded = false;
+function loadPayPalScriptAndRenderButton() {
+    // Solo carga si hay productos y Client ID válido
+    if (!CONFIG.PAYPAL_CLIENT_ID || cart.length === 0) {
+        document.getElementById('paypal-button-container').innerHTML = '';
+        return;
+    }
+    // Si ya está cargado, renderiza el botón
+    if (paypalScriptLoaded && typeof paypal !== 'undefined') {
+        renderPayPalButton();
+        return;
+    }
+    // Si el script no está, lo carga
+    if (!document.getElementById('paypal-sdk')) {
+        const script = document.createElement('script');
+        script.id = 'paypal-sdk';
+        script.src = `https://www.paypal.com/sdk/js?client-id=${CONFIG.PAYPAL_CLIENT_ID}&currency=USD`;
+        script.onload = () => {
+            paypalScriptLoaded = true;
+            // Espera a que el objeto paypal esté en window
+            let tries = 0;
+            function tryRender() {
+                if (typeof paypal !== 'undefined') {
                     renderPayPalButton();
-                };
-                document.body.appendChild(script);
+                } else if (tries < 10) {
+                    tries++;
+                    setTimeout(tryRender, 100);
+                }
             }
-        }
+            tryRender();
+        };
+        document.body.appendChild(script);
+    }
+}
 
         function renderPayPalButton() {
             // Solo renderiza si hay productos en el carrito
