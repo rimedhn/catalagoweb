@@ -139,12 +139,12 @@
     
     <script>
         // URLs de configuración y productos
-        const CONFIG_URL = 'https://opensheet.elk.sh/1IAD2MyZz8DMvVJlsQq4AgNRIUGhdqwPHVJolVYDVOH4/config';
+        const CONFIG_URL = 'https://opensheet.elk.sh/1ZI3GIGK5AjIyk2MTg-XRtigiDx7wZlkHOk6lYqO2VYc/config';
         const OPENSHEET_URL = 'https://opensheet.elk.sh/1ZI3GIGK5AjIyk2MTg-XRtigiDx7wZlkHOk6lYqO2VYc/demo1';
 
         let CONFIG = {
             PAYPAL_CLIENT_ID: '',
-            RECARGO_TC: 0,
+            RECARGO_TC: 0, // Porcentaje!
             TIPO_CAMBIO: 25,
             WHATSAPP_NUMBER: '50499999999',
             NOMBRE_NEGOCIO: 'Empresa Demo',
@@ -196,7 +196,7 @@
                 const data = await res.json();
                 const cfg = data[0];
                 CONFIG.PAYPAL_CLIENT_ID = cfg.PAYPAL_CLIENT_ID || '';
-                CONFIG.RECARGO_TC = parseFloat(cfg.RECARGO_TC || '0');
+                CONFIG.RECARGO_TC = parseFloat(cfg.RECARGO_TC || '0'); // % como número, ej: '5' para 5%
                 CONFIG.TIPO_CAMBIO = parseFloat(cfg.TIPO_CAMBIO || '25');
                 CONFIG.WHATSAPP_NUMBER = cfg.WHATSAPP_NUMBER || '50499999999';
                 CONFIG.NOMBRE_NEGOCIO = cfg.NOMBRE_NEGOCIO || 'Empresa Demo';
@@ -326,5 +326,356 @@
                data-fslightbox
                data-type="image"
                data-title="${product.name}">
-                <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-contain rounded-md mb-2" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e0e0e0/555555?text`
-
+                <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-contain rounded-md mb-2" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e0e0e0/555555?text=Imagen+no+disponible';">
+            </a>
+                <h3 class="text-xl font-bold text-gray-800 mb-0.5 flex-grow">${product.name}</h3>
+                <p class="text-gray-600 text-sm mb-0.5 line-clamp-3">${product.description}</p>
+                <div class="text-2xl font-extrabold text-green-600 mb-0.5">L${product.price.toFixed(2)}</div>
+                <div class="flex items-center justify-center space-x-2 mt-2 mb-2">
+                <button data-product-id="${product.id}" data-action="decrease-card" class="quantity-card-btn p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                </button>
+                <input type="number" value="1" min="1" data-product-id="${product.id}" class="quantity-card-input w-16 text-center border border-gray-300 rounded-md p-1" style="-moz-appearance: textfield; appearance: textfield;">
+                <button data-product-id="${product.id}" data-action="increase-card" class="quantity-card-btn p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                </button>
+                </div>
+                <button data-product-id="${product.id}" class="mt-auto w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all duration-200 add-to-cart-btn">
+                    Agregar al Carrito
+                </button>
+            `;
+            container.appendChild(productCard);
+
+            productCard.querySelector('.add-to-cart-btn').addEventListener('click', (event) => {
+                const productId = event.target.getAttribute('data-product-id');
+                const quantityInput = productCard.querySelector(`.quantity-card-input[data-product-id="${productId}"]`);
+                const quantity = parseInt(quantityInput.value);
+                addProductToCart(productId, quantity); 
+            });
+
+            productCard.querySelectorAll('.quantity-card-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = event.currentTarget.getAttribute('data-product-id');
+                    const action = event.currentTarget.getAttribute('data-action');
+                    const quantityInput = productCard.querySelector(`.quantity-card-input[data-product-id="${productId}"]`);
+                    let currentQuantity = parseInt(quantityInput.value);
+                    if (action === 'increase-card') {
+                        currentQuantity++;
+                    } else if (action === 'decrease-card' && currentQuantity > 1) {
+                        currentQuantity--;
+                    }
+                    quantityInput.value = currentQuantity;
+                });
+            });
+
+            productCard.querySelector('.quantity-card-input').addEventListener('wheel', (event) => {
+                event.preventDefault();
+            });
+        }
+
+        function addProductToCart(productId, quantityToAdd = 1) {
+            const product = allProducts.find(p => p.id == productId);
+            if (product) {
+                const existingItem = cart.find(item => item.id == productId);
+                if (existingItem) {
+                    existingItem.quantity += quantityToAdd;
+                } else {
+                    cart.push({ ...product, quantity: quantityToAdd });
+                }
+                renderCart();
+                updateFloatingCartButton();
+                showCustomAlert(`${product.id} - ${product.description} ha sido agregado al carrito.`, `cartConfirmation`);
+            } else {
+                showCustomAlert('Error: Producto no encontrado.');
+            }
+        }
+
+        function renderCart() {
+            const cartItemsUl = document.getElementById('cartItems').querySelector('ul');
+            const cartTotalDiv = document.getElementById('cartTotal');
+            const tcFeeDiv = document.getElementById('tcFeeDiv');
+            const cartTotalUSD = document.getElementById('cartTotalUSD');
+            cartItemsUl.innerHTML = '';
+            let total = 0;
+            if (cart.length > 0) {
+                const headerRow = document.createElement('li');
+                headerRow.classList.add('py-2', 'text-gray-600', 'font-bold', 'border-b', 'border-gray-300', 'mb-2');
+                headerRow.style.display = 'grid';
+                headerRow.style.gridTemplateColumns = '25% 30% 30% 15%';
+                headerRow.innerHTML = `
+                    <div class="text-center">Cantidad</div>
+                    <div class="text-center">Precio Unit.</div>
+                    <div class="text-right">Subtotal</div>
+                    <div class="text-center"></div> `;
+                cartItemsUl.appendChild(headerRow);
+            }
+            if (cart.length === 0) {
+                cartItemsUl.innerHTML = '<li class="py-3 text-gray-500">El carrito está vacío.</li>';
+                viewCartFloatingButton.classList.add('hidden');
+                cartTotalDiv.textContent = '';
+                tcFeeDiv.textContent = '';
+                cartTotalUSD.textContent = '';
+            } else {
+                cart.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('py-3', 'text-gray-700', 'border-b', 'border-gray-100');
+                listItem.innerHTML = `
+                    <div class="text-left mb-2"> <span class="font-semibold text-lg">${item.name}</span>
+                        <span class="text-sm text-gray-500 block">${item.description}</span>
+                    </div>
+                    <div class="grid items-center gap-2" style="grid-template-columns: 25% 30% 30% 15%;">
+                        <div class="flex items-center justify-center space-x-0.5 sm:space-x-2">
+                            <button data-product-id="${item.id}" data-action="decrease" class="quantity-btn p-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                            </button>
+                            <input type="number" value="${item.quantity}" min="1" data-product-id="${item.id}" class="quantity-input w-12 sm:w-16 text-center border border-gray-300 rounded-md p-1 text-sm" style="-moz-appearance: textfield; appearance: textfield;">
+                            <button data-product-id="${item.id}" data-action="increase" class="quantity-btn p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            </button>
+                        </div>
+                        <div class="text-center whitespace-nowrap text-sm sm:text-base">L${item.price.toFixed(2)}</div>
+                        <div class="text-right whitespace-nowrap font-semibold text-sm sm:text-base">L${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="flex items-center justify-center">
+                            <button data-product-id="${item.id}" class="remove-item-btn text-red-500 hover:text-red-700 focus:outline-none p-1">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                cartItemsUl.appendChild(listItem);
+                total += item.price * item.quantity;
+                });
+
+                cartItemsUl.querySelectorAll('.quantity-btn').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const productId = event.currentTarget.getAttribute('data-product-id');
+                        const action = event.currentTarget.getAttribute('data-action');
+                        updateProductQuantity(productId, action);
+                    });
+                });
+
+                cartItemsUl.querySelectorAll('.quantity-input').forEach(input => {
+                    input.addEventListener('change', (event) => {
+                        const productId = event.target.getAttribute('data-product-id');
+                        const newQuantity = parseInt(event.target.value);
+                        updateProductQuantity(productId, 'manual', newQuantity);
+                    });
+                    input.addEventListener('wheel', (event) => {
+                        event.preventDefault();
+                    });
+                });
+
+                cartItemsUl.querySelectorAll('.remove-item-btn').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const productId = event.currentTarget.getAttribute('data-product-id');
+                        removeProductCompletely(productId);
+                    });
+                });
+                viewCartFloatingButton.classList.remove('hidden');
+                // Totales con recargo TC y USD
+                cartTotalDiv.textContent = `Total: L${total.toFixed(2)}`;
+                tcFeeDiv.textContent = `Recargo por pago con tarjeta: ${CONFIG.RECARGO_TC.toFixed(2)}%`;
+                let totalConRecargo = total * (1 + (CONFIG.RECARGO_TC / 100));
+                let totalUSD = totalConRecargo / CONFIG.TIPO_CAMBIO;
+                cartTotalUSD.textContent = `Total a pagar con tarjeta (USD): $${totalUSD.toFixed(2)} (T.C.: ${CONFIG.TIPO_CAMBIO})`;
+            }
+            updateFloatingCartButton();
+        }
+
+        function updateProductQuantity(productId, action, newQuantity) {
+            const existingItem = cart.find(item => item.id == productId);
+            if (existingItem) {
+                if (action === 'increase') {
+                    existingItem.quantity++;
+                } else if (action === 'decrease') {
+                    existingItem.quantity--;
+                } else if (action === 'manual' && newQuantity >= 1) {
+                    existingItem.quantity = newQuantity;
+                }
+                if (existingItem.quantity <= 0) {
+                    removeProductCompletely(productId);
+                } else {
+                    renderCart();
+                }
+            }
+        }
+
+        function removeProductCompletely(productId) {
+            cart = cart.filter(item => item.id != productId);
+            renderCart();
+            updateFloatingCartButton();
+        }
+
+        function updateFloatingCartButton() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartItemCount').textContent = totalItems;
+            if (totalItems > 0) {
+                viewCartFloatingButton.classList.remove('hidden');
+            } else {
+                viewCartFloatingButton.classList.add('hidden');
+            }
+        }
+
+        function sendWhatsAppOrder() {
+            if (cart.length === 0) {
+                showCustomAlert('Tu carrito está vacío. Agrega productos antes de enviar el pedido.');
+                return;
+            }
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const customerAddress = document.getElementById('customerAddress').value.trim();
+            const additionalNotes = document.getElementById('additionalNotes').value.trim();
+            if (!customerName || !customerPhone || !customerAddress) {
+                showCustomAlert('Por favor, completa tu Nombre, Teléfono y Dirección para enviar el pedido.');
+                return;
+            }
+            let orderSummary = `¡Hola! Me gustaría hacer un pedido desde el catálogo de ${CONFIG.NOMBRE_NEGOCIO}.\n\n`;
+            orderSummary += `*DATOS DEL CLIENTE:*\n`;
+            orderSummary += `Nombre: ${customerName}\n`;
+            orderSummary += `Teléfono: ${customerPhone}\n`;
+            orderSummary += `Dirección: ${customerAddress}\n`;
+            if (additionalNotes) {
+                orderSummary += `Notas: ${additionalNotes}\n`;
+            }
+            orderSummary += `\n*DETALLES DEL PEDIDO:*\n`;
+            let total = 0;
+            cart.forEach(item => {
+                orderSummary += `- *${item.id}* - *${item.description}*\n`; 
+                orderSummary += `  Cantidad: *${item.quantity}* | Precio Unit: *L${item.price.toFixed(2)}* | Subtotal: *L${(item.price * item.quantity).toFixed(2)}*\n\n`;
+                total += item.price * item.quantity;
+            });
+            let totalConRecargo = total * (1 + (CONFIG.RECARGO_TC / 100));
+            orderSummary += `\n*Total a Pagar: L${total.toFixed(2)}*\n`;
+            orderSummary += `*Recargo por pago con tarjeta: ${CONFIG.RECARGO_TC.toFixed(2)}%*\n`;
+            orderSummary += `*Total con recargo: L${totalConRecargo.toFixed(2)}*\n`;
+            let totalUSD = totalConRecargo / CONFIG.TIPO_CAMBIO;
+            orderSummary += `*Equivalente USD: $${totalUSD.toFixed(2)} (T.C. ${CONFIG.TIPO_CAMBIO})*\n`;
+            orderSummary += `\n¡Muchas Gracias!`;
+            const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(orderSummary)}`;
+            window.open(whatsappUrl, '_blank');
+            cart = [];
+            renderCart();
+            document.getElementById('cartModal').classList.remove('show');
+            showCustomAlert('Muchas gracias! Tu pedido ha sido enviado a WhatsApp! Te contactaremos pronto.');
+        }
+
+        // --- PayPal Integration ---
+        let paypalScriptLoaded = false;
+        function loadPayPalScriptAndRenderButton() {
+            if (!CONFIG.PAYPAL_CLIENT_ID) return; // No Client ID
+            if (paypalScriptLoaded) {
+                renderPayPalButton();
+                return;
+            }
+            if (document.getElementById('paypal-sdk')) return;
+            const script = document.createElement('script');
+            script.id = 'paypal-sdk';
+            script.src = `https://www.paypal.com/sdk/js?client-id=${CONFIG.PAYPAL_CLIENT_ID}&currency=USD`;
+            script.onload = () => {
+                paypalScriptLoaded = true;
+                renderPayPalButton();
+            };
+            document.body.appendChild(script);
+        }
+
+        function renderPayPalButton() {
+            if (typeof paypal === 'undefined') return;
+            document.getElementById('paypal-button-container').innerHTML = '';
+            let totalLempiras = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            totalLempiras = totalLempiras * (1 + CONFIG.RECARGO_TC / 100);
+            let totalUSD = totalLempiras / CONFIG.TIPO_CAMBIO;
+            paypal.Buttons({
+                style: { layout:'vertical', color:'gold', shape:'rect', label:'paypal' },
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: totalUSD.toFixed(2),
+                                currency_code: "USD"
+                            },
+                            description: "Pedido en Catálogo Web " + CONFIG.NOMBRE_NEGOCIO
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        showCustomAlert(`¡Pago realizado con éxito por ${details.payer.name.given_name}!`);
+                        cart = [];
+                        renderCart();
+                        document.getElementById('cartModal').classList.remove('show');
+                    });
+                },
+                onError: function(err) {
+                    showCustomAlert('Hubo un error con el pago de PayPal: ' + err);
+                }
+            }).render('#paypal-button-container');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadConfig();
+            await loadProducts();
+            const categorySelect = document.getElementById('categorySelect');
+            if (categorySelect) {
+                categorySelect.addEventListener('change', (event) => {
+                    renderProducts(event.target.value);
+                });
+            }
+            const searchBar = document.getElementById('searchBar');
+            if (searchBar) {
+                searchBar.addEventListener('input', function() {
+                    renderProducts(categorySelect.value);
+                });
+            }
+            document.getElementById('checkoutButton').addEventListener('click', sendWhatsAppOrder);
+            document.getElementById('viewCartFloatingButton').addEventListener('click', () => {
+                renderCart();
+                document.getElementById('cartModal').classList.add('show');
+                loadPayPalScriptAndRenderButton();
+            });
+            document.getElementById('cartModalCloseButton').addEventListener('click', () => {
+                document.getElementById('cartModal').classList.remove('show');
+            });
+            document.getElementById('cartModal').addEventListener('click', (event) => {
+                if (event.target === document.getElementById('cartModal')) {
+                    document.getElementById('cartModal').classList.remove('show');
+                }
+            });
+            const continueShoppingButton = document.getElementById('continueShoppingButton');
+            if (continueShoppingButton) {
+                continueShoppingButton.addEventListener('click', () => {
+                    document.getElementById('cartModal').classList.remove('show');
+                });
+            }
+            updateFloatingCartButton();
+            showCustomAlert("¡BIENVENIDO! AGREGA PRODUCTOS AL CARRITO DE COMPRA, TUS DATOS Y ENVÍA TU PEDIDO POR WHATSAPP O PAGA CON TARJETA!");
+        });
+    </script>
+         
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm mb-4">
+                &copy; 2025 <span id="negocioNameFooter">Tu Empresa</span>. Todos los derechos reservados.<br>
+                Catálogo de productos desarrollado por: Rimed Digital,
+                <a id="negocioEmailFooter" href="#" class="text-blue-400 hover:underline"></a>
+                <a id="negocioTelFooter" href="#" class="text-blue-400 hover:underline"></a>
+            </p>
+        </div>
+        <div class="flex justify-left space-x-6 ml-5 mb-4">
+            <!-- Tus redes aquí si quieres -->
+        </div>
+    </footer>
+    <script>
+        // Actualiza footer de contacto con datos de config
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('negocioNameFooter').textContent = CONFIG.NOMBRE_NEGOCIO;
+                document.getElementById('negocioEmailFooter').textContent = CONFIG.EMAIL_NEGOCIO;
+                document.getElementById('negocioEmailFooter').href = `mailto:${CONFIG.EMAIL_NEGOCIO}`;
+                document.getElementById('negocioTelFooter').textContent = CONFIG.WHATSAPP_NUMBER;
+                document.getElementById('negocioTelFooter').href = `tel:+${CONFIG.WHATSAPP_NUMBER}`;
+            }, 1500);
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/fslightbox.js/index.js"></script>
+</body>
+</html>
