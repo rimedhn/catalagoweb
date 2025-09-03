@@ -576,59 +576,70 @@
         }
 
         function renderPayPalButton() {
-            const paypalContainer = document.getElementById('paypal-button-container');
-            paypalContainer.innerHTML = '';
-            if (!CONFIG.PAYPAL_CLIENT_ID) {
-                paypalContainer.innerHTML = '';
-                return;
+    const paypalContainer = document.getElementById('paypal-button-container');
+    paypalContainer.innerHTML = '';
+    if (!CONFIG.PAYPAL_CLIENT_ID) {
+        paypalContainer.innerHTML = '';
+        return;
+    }
+    let totalLempiras = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    totalLempiras = totalLempiras * (1 + CONFIG.RECARGO_TC / 100);
+    let totalUSD = totalLempiras / CONFIG.TIPO_CAMBIO;
+    if (typeof paypal === 'undefined') {
+        paypalContainer.innerHTML = '';
+        return;
+    }
+    const customerName = document.getElementById('customerName').value.trim();
+    const customerPhone = document.getElementById('customerPhone').value.trim();
+    const customerAddress = document.getElementById('customerAddress').value.trim();
+    const allowPayment = cart.length > 0 && customerName && customerPhone && customerAddress;
+    paypal.Buttons({
+        style: { layout:'vertical', color:'gold', shape:'rect', label:'paypal' },
+        onClick: function(data, actions) {
+            if (cart.length === 0) {
+                showCustomAlert('Tu carrito está vacío. Agrega productos antes de pagar.');
+                return actions.reject();
             }
-            let totalLempiras = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            totalLempiras = totalLempiras * (1 + CONFIG.RECARGO_TC / 100);
-            let totalUSD = totalLempiras / CONFIG.TIPO_CAMBIO;
-            if (typeof paypal === 'undefined') {
-                paypalContainer.innerHTML = '';
-                return;
+            if (!customerName || !customerPhone || !customerAddress) {
+                showCustomAlert('Por favor, completa tu Nombre, Teléfono y Dirección antes de pagar.');
+                return actions.reject();
             }
-            const customerName = document.getElementById('customerName').value.trim();
-            const customerPhone = document.getElementById('customerPhone').value.trim();
-            const customerAddress = document.getElementById('customerAddress').value.trim();
-            const allowPayment = cart.length > 0 && customerName && customerPhone && customerAddress;
-            paypal.Buttons({
-                style: { layout:'vertical', color:'gold', shape:'rect', label:'paypal' },
-                onInit: function(data, actions) {
-                    if (!allowPayment) actions.disable();
-                    else actions.enable();
-                    ['customerName','customerPhone','customerAddress'].forEach(id => {
-                        document.getElementById(id).addEventListener('input', function() {
-                            const n = document.getElementById('customerName').value.trim();
-                            const p = document.getElementById('customerPhone').value.trim();
-                            const a = document.getElementById('customerAddress').value.trim();
-                            if (cart.length > 0 && n && p && a) actions.enable();
-                            else actions.disable();
-                        });
-                    });
-                },
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: totalUSD.toFixed(2),
-                                currency_code: "USD"
-                            },
-                            description: "Pedido en Catálogo Web"
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        showCustomAlert(`¡Pago realizado con éxito por ${details.payer.name.given_name}! Ahora puedes enviar tu pedido por WhatsApp.`);
-                    });
-                },
-                onError: function(err) {
-                    showCustomAlert('Hubo un error con el pago de PayPal: ' + err);
-                }
-            }).render('#paypal-button-container');
+            return actions.resolve();
+        },
+        onInit: function(data, actions) {
+            if (!allowPayment) actions.disable();
+            else actions.enable();
+            ['customerName','customerPhone','customerAddress'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function() {
+                    const n = document.getElementById('customerName').value.trim();
+                    const p = document.getElementById('customerPhone').value.trim();
+                    const a = document.getElementById('customerAddress').value.trim();
+                    if (cart.length > 0 && n && p && a) actions.enable();
+                    else actions.disable();
+                });
+            });
+        },
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: totalUSD.toFixed(2),
+                        currency_code: "USD"
+                    },
+                    description: "Pedido en Catálogo Web"
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                showCustomAlert(`¡Pago realizado con éxito por ${details.payer.name.given_name}! Ahora puedes enviar tu pedido por WhatsApp.`);
+            });
+        },
+        onError: function(err) {
+            showCustomAlert('Hubo un error con el pago de PayPal: ' + err);
         }
+    }).render('#paypal-button-container');
+}
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadConfig();
