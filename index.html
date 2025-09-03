@@ -561,52 +561,54 @@
 
         // --- PayPal Integration ---
 let paypalScriptLoaded = false;
-function loadPayPalScriptAndRenderButton() {
-    // Solo carga si hay productos y Client ID válido
-    if (!CONFIG.PAYPAL_CLIENT_ID || cart.length === 0) {
-        document.getElementById('paypal-button-container').innerHTML = '';
-        return;
-    }
-    // Si ya está cargado, renderiza el botón
-    if (paypalScriptLoaded && typeof paypal !== 'undefined') {
-        renderPayPalButton();
-        return;
-    }
-    // Si el script no está, lo carga
-    if (!document.getElementById('paypal-sdk')) {
-        const script = document.createElement('script');
-        script.id = 'paypal-sdk';
-        script.src = `https://www.paypal.com/sdk/js?client-id=${CONFIG.PAYPAL_CLIENT_ID}&currency=USD`;
-        script.onload = () => {
-            paypalScriptLoaded = true;
-            // Espera a que el objeto paypal esté en window
-            let tries = 0;
-            function tryRender() {
-                if (typeof paypal !== 'undefined') {
+        function ensurePayPalScript() {
+            if (paypalScriptLoaded || !CONFIG.PAYPAL_CLIENT_ID) return;
+            if (!document.getElementById('paypal-sdk')) {
+                const script = document.createElement('script');
+                script.id = 'paypal-sdk';
+                script.src = `https://www.paypal.com/sdk/js?client-id=${CONFIG.PAYPAL_CLIENT_ID}&currency=USD`;
+                script.onload = () => {
+                    paypalScriptLoaded = true;
                     renderPayPalButton();
-                } else if (tries < 10) {
-                    tries++;
-                    setTimeout(tryRender, 100);
-                }
+                };
+                document.body.appendChild(script);
             }
-            tryRender();
-        };
-        document.body.appendChild(script);
-    }
-}
+        }
 
         function renderPayPalButton() {
-            // Solo renderiza si hay productos en el carrito
-            if (typeof paypal === 'undefined' || cart.length === 0) {
-                document.getElementById('paypal-button-container').innerHTML = '';
+            const paypalContainer = document.getElementById('paypal-button-container');
+            paypalContainer.innerHTML = '';
+            if (!CONFIG.PAYPAL_CLIENT_ID) {
+                paypalContainer.innerHTML = '<div class="text-center text-red-500">Pago con tarjeta no disponible.</div>';
                 return;
             }
-            document.getElementById('paypal-button-container').innerHTML = '';
             let totalLempiras = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
             totalLempiras = totalLempiras * (1 + CONFIG.RECARGO_TC / 100);
             let totalUSD = totalLempiras / CONFIG.TIPO_CAMBIO;
+            if (typeof paypal === 'undefined') {
+                paypalContainer.innerHTML = '<div class="flex justify-center"><div class="text-gray-500">Cargando botón de pago...</div></div>';
+                return;
+            }
+            // Validar datos de cliente
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const customerAddress = document.getElementById('customerAddress').value.trim();
+            const allowPayment = cart.length > 0 && customerName && customerPhone && customerAddress;
             paypal.Buttons({
                 style: { layout:'vertical', color:'gold', shape:'rect', label:'paypal' },
+                onInit: function(data, actions) {
+                    if (!allowPayment) actions.disable();
+                    else actions.enable();
+                    ['customerName','customerPhone','customerAddress'].forEach(id => {
+                        document.getElementById(id).addEventListener('input', function() {
+                            const n = document.getElementById('customerName').value.trim();
+                            const p = document.getElementById('customerPhone').value.trim();
+                            const a = document.getElementById('customerAddress').value.trim();
+                            if (cart.length > 0 && n && p && a) actions.enable();
+                            else actions.disable();
+                        });
+                    });
+                },
                 createOrder: function(data, actions) {
                     return actions.order.create({
                         purchase_units: [{
@@ -614,14 +616,13 @@ function loadPayPalScriptAndRenderButton() {
                                 value: totalUSD.toFixed(2),
                                 currency_code: "USD"
                             },
-                            description: "Pedido en Catálogo Web " + CONFIG.NOMBRE_NEGOCIO
+                            description: "Pedido en Catálogo Web"
                         }]
                     });
                 },
                 onApprove: function(data, actions) {
                     return actions.order.capture().then(function(details) {
                         showCustomAlert(`¡Pago realizado con éxito por ${details.payer.name.given_name}! Ahora puedes enviar tu pedido por WhatsApp.`);
-                        // El usuario puede ahora enviar el pedido con el botón WhatsApp
                     });
                 },
                 onError: function(err) {
@@ -629,6 +630,21 @@ function loadPayPalScriptAndRenderButton() {
                 }
             }).render('#paypal-button-container');
         }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadConfig();
+            await loadProducts();
+            ensurePayPalScript();
+            document.getElementById('viewCartFloatingButton').addEventListener('click', () => {
+                renderCart();
+                document.getElementById('cartModal').classList.add('show');
+                renderPayPalButton();
+            });
+            ['customerName','customerPhone','customerAddress'].forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    renderPayPalButton();
+                });
+            });
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadConfig();
